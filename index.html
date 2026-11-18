@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MedTerm Pro - 의학용어 검색 & 단어 분해 사전</title>
+  <style>
+    :root {
+      --bg-primary: #f4f7fb;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #edf2f9;
+      --text-primary: #1a2332;
+      --text-secondary: #4a5568;
+      --text-muted: #718096;
+      --border-color: #e2e8f0;
+      --accent-primary: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft: #dbeafe;
+      --accent-text: #1e40af;
+      --prefix-bg: #fef3c7;
+      --prefix-text: #b45309;
+      --prefix-border: #fcd34d;
+      --root-bg: #dcfce7;
+      --root-text: #15803d;
+      --root-border: #86efac;
+      --suffix-bg: #f3e8ff;
+      --suffix-text: #7e22ce;
+      --suffix-border: #d8b4fe;
+      --abbr-bg: #fee2e2;
+      --abbr-text: #b91c1c;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 10px 25px rgba(15, 23, 42, 0.12);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #0f172a;
+      --bg-secondary: #1e293b;
+      --bg-tertiary: #334155;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --accent-primary: #3b82f6;
+      --accent-hover: #60a5fa;
+      --accent-soft: rgba(59, 130, 246, 0.2);
+      --accent-text: #93c5fd;
+      --prefix-bg: rgba(245, 158, 11, 0.18);
+      --prefix-text: #fcd34d;
+      --prefix-border: rgba(245, 158, 11, 0.45);
+      --root-bg: rgba(34, 197, 94, 0.18);
+      --root-text: #86efac;
+      --root-border: rgba(34, 197, 94, 0.45);
+      --suffix-bg: rgba(168, 85, 247, 0.18);
+      --suffix-text: #d8b4fe;
+      --suffix-border: rgba(168, 85, 247, 0.45);
+      --abbr-bg: rgba(239, 68, 68, 0.2);
+      --abbr-text: #fca5a5;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background-color 0.25s ease, color 0.25s ease;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0.9rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2563eb, #06b6d4);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      background: var(--bg-tertiary);
+      padding: 0.25rem;
+      border-radius: var(--radius-md);
+      gap: 0.25rem;
+    }
+
+    .nav-tab {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      padding: 0.5rem 0.95rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .nav-tab.active {
+      background: var(--bg-secondary);
+      color: var(--accent-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .theme-btn {
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      transition: var(--transition);
+    }
+
+    .theme-btn:hover {
+      border-color: var(--accent-primary);
+      background: var(--bg-tertiary);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      flex: 1;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Search Area */
+    .search-hero {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .search-bar-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      color: var(--text-muted);
+      font-size: 1.15rem;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.9rem 2.8rem 0.9rem 2.85rem;
+      font-size: 1.02rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-primary);
+      background: var(--bg-secondary);
+      box-shadow: 0 0 0 4px var(--accent-soft);
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 0.85rem;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      border: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .clear-btn.visible {
+      display: flex;
+    }
+
+    .search-controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .search-mode-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .mode-chip {
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .mode-chip.active {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+    }
+
+    .stats-bar {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .stats-bar strong {
+      color: var(--accent-primary);
+      font-weight: 700;
+    }
+
+    /* Category Pills */
+    .category-bar {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.25rem;
+      scrollbar-width: thin;
+    }
+
+    .category-bar::-webkit-scrollbar {
+      height: 5px;
+    }
+
+    .category-bar::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 999px;
+    }
+
+    .cat-btn {
+      border: 1px solid var(--border-color);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      padding: 0.5rem 0.95rem;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .cat-btn:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .cat-btn.active {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+    }
+
+    .cat-count {
+      font-size: 0.74rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+    }
+
+    .cat-btn.active .cat-count {
+      background: rgba(255, 255, 255, 0.22);
+      color: #ffffff;
+    }
+
+    /* Terms Grid */
+    .terms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 1rem;
+    }
+
+    .term-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 0.75rem;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+
+    .term-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--accent-primary);
+    }
+
+    .term-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .term-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .badge-cat {
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: var(--accent-soft);
+      color: var(--accent-text);
+    }
+
+    .badge-abbr {
+      font-size: 0.74rem;
+      font-weight: 800;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: var(--abbr-bg);
+      color: var(--abbr-text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .analyze-link-btn {
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.55rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .analyze-link-btn:hover {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+    }
+
+    .term-en {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      word-break: break-word;
+      line-height: 1.3;
+    }
+
+    .term-ko {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-top: 0.15rem;
+    }
+
+    .term-desc {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .term-etym {
+      font-size: 0.79rem;
+      background: var(--bg-primary);
+      border: 1px dashed var(--border-color);
+      padding: 0.45rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .etym-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.1rem 0.42rem;
+      border-radius: 5px;
+      font-weight: 700;
+      font-size: 0.75rem;
+    }
+
+    .etym-chip.prefix {
+      background: var(--prefix-bg);
+      color: var(--prefix-text);
+      border: 1px solid var(--prefix-border);
+    }
+
+    .etym-chip.root {
+      background: var(--root-bg);
+      color: var(--root-text);
+      border: 1px solid var(--root-border);
+    }
+
+    .etym-chip.suffix {
+      background: var(--suffix-bg);
+      color: var(--suffix-text);
+      border: 1px solid var(--suffix-border);
+    }
+
+    mark.hl {
+      background: #fef08a;
+      color: #1e293b;
+      padding: 0 2px;
+      border-radius: 3px;
+    }
+
+    /* Word Decomposer & Morpheme Section */
+    .decomposer-box {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.1rem;
+    }
+
+    .decomposer-input-row {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .decomposer-input {
+      flex: 1;
+      min-width: 220px;
+      padding: 0.85rem 1rem;
+      font-size: 1.05rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-weight: 600;
+      outline: none;
+    }
+
+    .decomposer-input:focus {
+      border-color: var(--accent-primary);
+    }
+
+    .primary-btn {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border: none;
+      padding: 0.85rem 1.35rem;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .primary-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .sample-words {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      margin-top: 0.85rem;
+    }
+
+    .sample-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .sample-chip {
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-secondary);
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .sample-chip:hover {
+      border-color: var(--accent-primary);
+      color: var(--accent-primary);
+    }
+
+    .decompose-result {
+      margin-top: 1.25rem;
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .parts-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+
+    .part-box {
+      flex: 1;
+      min-width: 170px;
+      padding: 1rem;
+      border-radius: var(--radius-md);
+      border: 2px solid transparent;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .part-box.prefix {
+      background: var(--prefix-bg);
+      color: var(--prefix-text);
+      border-color: var(--prefix-border);
+    }
+
+    .part-box.root {
+      background: var(--root-bg);
+      color: var(--root-text);
+      border-color: var(--root-border);
+    }
+
+    .part-box.suffix {
+      background: var(--suffix-bg);
+      color: var(--suffix-text);
+      border-color: var(--suffix-border);
+    }
+
+    .part-type {
+      font-size: 0.74rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.85;
+    }
+
+    .part-morpheme {
+      font-size: 1.3rem;
+      font-weight: 800;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .part-meaning {
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .part-plus {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    /* Morpheme Dictionary Grid */
+    .morpheme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .morpheme-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .morpheme-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .morpheme-form {
+      font-size: 1.15rem;
+      font-weight: 800;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .morpheme-meaning {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .morpheme-examples {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      background: var(--bg-secondary);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+      color: var(--text-muted);
+    }
+
+    /* Footer */
+    footer {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border-color);
+      padding: 1.4rem 1.25rem;
+      margin-top: auto;
+    }
+
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      text-align: center;
+    }
+
+    .disclaimer-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--abbr-bg);
+      color: var(--abbr-text);
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 0.92rem;
+    }
+
+    .footer-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .header-inner {
+        padding: 0.75rem 1rem;
+      }
+
+      .brand-title {
+        font-size: 1.1rem;
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .nav-tabs {
+        flex: 1;
+      }
+
+      .nav-tab {
+        flex: 1;
+        text-align: center;
+        padding: 0.5rem 0.4rem;
+        font-size: 0.82rem;
+      }
+
+      main {
+        padding: 1rem 0.85rem 2.5rem;
+      }
+
+      .search-hero, .decomposer-box {
+        padding: 1.1rem;
+      }
+
+      .terms-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .part-plus {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <a href="#" class="brand" onclick="switchTab('dictionary'); return false;">
+        <div class="brand-icon">M+</div>
+        <div>
+          <span class="brand-title">MedTerm Pro</span>
+          <span class="brand-subtitle">의학용어 검색 · 형태소 사전 · 단어 분해기</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <nav class="nav-tabs" aria-label="주요 메뉴">
+          <button type="button" class="nav-tab active" data-tab="dictionary" onclick="switchTab('dictionary')">
+            📚 의학용어 사전
+          </button>
+          <button type="button" class="nav-tab" data-tab="decomposer" onclick="switchTab('decomposer')">
+            🔬 단어 분해기 & 어근 사전
+          </button>
+        </nav>
+        <button type="button" class="theme-btn" id="themeToggleBtn" title="다크 모드 전환" aria-label="다크 모드 전환">
+          🌙
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB 1: 의학용어 사전 -->
+    <section id="tab-dictionary" class="tab-panel active">
+      <div class="search-hero">
+        <div class="search-bar-wrap">
+          <span class="search-icon">🔍</span>
+          <input
+            type="search"
+            id="termSearchInput"
+            class="search-input"
+            placeholder="영어 용어(예: Tachycardia), 한글(예: 빈맥, 심근경색), 약어(예: MI, COPD, HTN)로 검색..."
+            autocomplete="off"
+          />
+          <button type="button" id="clearSearchBtn" class="clear-btn" title="검색어 지우기">✕</button>
+        </div>
+        <div class="search-controls-row">
+          <div class="search-mode-group" id="searchModeGroup">
+            <button type="button" class="mode-chip active" data-mode="all">전체 (영어+한글+약어)</button>
+            <button type="button" class="mode-chip" data-mode="en">영어 (English)</button>
+            <button type="button" class="mode-chip" data-mode="ko">한글 (Korean)</button>
+            <button type="button" class="mode-chip" data-mode="abbr">약어 (Abbreviation)</button>
+          </div>
+          <div class="stats-bar" id="termCountStats">
+            총 <strong id="filteredCount">0</strong> / <span id="totalCount">0</span>개 용어
+          </div>
+        </div>
+      </div>
+
+      <div class="category-bar" id="categoryBar" role="tablist" aria-label="분류별 필터"></div>
+
+      <div id="termsGrid" class="terms-grid"></div>
+    </section>
+
+    <!-- TAB 2: 영어 용어 단어 분해기 & 어근/접두사/접미사 사전 -->
+    <section id="tab-decomposer" class="tab-panel">
+      <div class="decomposer-box">
+        <h2 class="section-title">🔬 영어 의학용어 단어 분해기 (Medical Word Decomposer)</h2>
+        <p class="section-desc">
+          영어 의학용어를 입력하면 <strong>접두사(Prefix)</strong> + <strong>어근(Root)</strong> + <strong>접미사(Suffix)</strong>로 자동 분해하여 어원과 뜻을 분석합니다.
+        </p>
+        <div class="decomposer-input-row">
+          <input
+            type="text"
+            id="decomposeInput"
+            class="decomposer-input"
+            placeholder="분해할 영어 의학용어 입력 (예: Electrocardiogram, Gastroenteritis, Bradycardia, Nephrectomy)"
+            value="Electrocardiogram"
+          />
+          <button type="button" class="primary-btn" id="decomposeBtn">단어 분해하기</button>
+        </div>
+        <div class="sample-words">
+          <span class="sample-label">예시 클릭:</span>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Electrocardiogram')">Electrocardiogram</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Gastroenteritis')">Gastroenteritis</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Hyperglycemia')">Hyperglycemia</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Tachycardia')">Tachycardia</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Osteoarthritis')">Osteoarthritis</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Encephalopathy')">Encephalopathy</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Cholecystectomy')">Cholecystectomy</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Hemoglobinopathy')">Hemoglobinopathy</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Polyneuropathy')">Polyneuropathy</button>
+          <button type="button" class="sample-chip" onclick="runDecomposer('Pneumothorax')">Pneumothorax</button>
+        </div>
+        <div id="decomposeOutput" class="decompose-result"></div>
+      </div>
+
+      <div class="search-hero">
+        <h2 class="section-title">🧩 어근 · 접두사 · 접미사 사전 (Morpheme Dictionary)</h2>
+        <p class="section-desc">의학용어를 구성하는 필수 형태소(접두사, 어근, 접미사)를 검색하고 클릭하여 예시 용어를 확인하세요.</p>
+        <div class="search-bar-wrap">
+          <span class="search-icon">🔍</span>
+          <input
+            type="search"
+            id="morphemeSearchInput"
+            class="search-input"
+            placeholder="형태소(예: cardi, hyper, -itis, gastro) 또는 한글 뜻(예: 심장, 염증, 과다) 검색..."
+            autocomplete="off"
+          />
+        </div>
+        <div class="search-controls-row">
+          <div class="search-mode-group" id="morphemeTypeGroup">
+            <button type="button" class="mode-chip active" data-mtype="all">전체 형태소</button>
+            <button type="button" class="mode-chip" data-mtype="prefix">접두사 (Prefix)</button>
+            <button type="button" class="mode-chip" data-mtype="root">어근 (Root)</button>
+            <button type="button" class="mode-chip" data-mtype="suffix">접미사 (Suffix)</button>
+          </div>
+          <div class="stats-bar">
+            형태소 <strong id="morphemeCount">0</strong>개 표시 중
+          </div>
+        </div>
+      </div>
+
+      <div id="morphemeGrid" class="morpheme-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="disclaimer-banner" role="note">
+        ⚠️ 공부용이며 진단에 사용하지 마세요
+      </div>
+      <p class="footer-meta">
+        MedTerm Pro · 의학/간호/보건계열 학습용 의학용어 사전 (총 <span id="footerTotalTerms">0</span>개 용어 수록)
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // =========================================================================
+    // 1. 어근 · 접두사 · 접미사 형태소 사전 데이터 (MORPHEMES)
+    // =========================================================================
+    const MORPHEMES = [
+      // Prefixes (접두사)
+      { type: "prefix", form: "a- / an-", keys: ["an", "a"], meaning: "없음, 결핍 (without, lack of)", examples: "Anemia (빈혈), Apnea (무호흡), Aphasia (실어증)" },
+      { type: "prefix", form: "ab-", keys: ["ab"], meaning: "멀어지는, 비정상 (away from)", examples: "Abduction (외전), Abnormal (비정상)" },
+      { type: "prefix", form: "ad-", keys: ["ad"], meaning: "가까워지는, 향하는 (toward)", examples: "Adduction (내전), Adrenal (부신의)" },
+      { type: "prefix", form: "ante- / pre- / pro-", keys: ["ante", "pre", "pro"], meaning: "앞, 이전 (before, in front of)", examples: "Antenatal (산전의), Preoperative (수술전의), Prognosis (예후)" },
+      { type: "prefix", form: "anti- / contra-", keys: ["anti", "contra"], meaning: "반대, 대항 (against)", examples: "Antibiotic (항생제), Contraindication (금기)" },
+      { type: "prefix", form: "auto-", keys: ["auto"], meaning: "스스로, 자가 (self)", examples: "Autoimmune (자가면역), Autopsy (부검)" },
+      { type: "prefix", form: "bi- / di-", keys: ["bi", "di"], meaning: "둘, 양쪽 (two, double)", examples: "Bilateral (양측성),icuspid (이첨판)" },
+      { type: "prefix", form: "brady-", keys: ["brady"], meaning: "느린 (slow)", examples: "Bradycardia (서맥), Bradypnea (서호흡), Bradykinesia (운동완만)" },
+      { type: "prefix", form: "tachy-", keys: ["tachy"], meaning: "빠른 (fast, rapid)", examples: "Tachycardia (빈맥), Tachypnea (빈호흡)" },
+      { type: "prefix", form: "circum- / peri-", keys: ["circum", "peri"], meaning: "주위, 주변 (around)", examples: "Pericardium (심낭), Periosteum (골막)" },
+      { type: "prefix", form: "dys-", keys: ["dys"], meaning: "나쁜, 곤란한, 통증성 (difficult, painful, abnormal)", examples: "Dyspnea (호흡곤란), Dysphagia (연하곤란), Dysuria (배뇨곤란)" },
+      { type: "prefix", form: "eu-", keys: ["eu"], meaning: "정상적인, 좋은 (good, normal)", examples: "Eupnea (정상호흡), Euthyroid (정상갑상선기능)" },
+      { type: "prefix", form: "endo- / intra-", keys: ["endo", "intra"], meaning: "안, 내부 (within, inside)", examples: "Endoscopy (내시경), Endocardium (심내막), Intravenous (정맥내)" },
+      { type: "prefix", form: "epi-", keys: ["epi"], meaning: "위, 표피 (upon, above)", examples: "Epidermis (표피), Epigastric (명치부, 상복부), Epidural (경막외)" },
+      { type: "prefix", form: "exo- / extra- / ecto-", keys: ["exo", "extra", "ecto"], meaning: "바깥, 외부 (outside)", examples: "Exocrine (외분비), Extracorporeal (체외의), Ectopic (자궁외/이소성)" },
+      { type: "prefix", form: "hemi- / semi-", keys: ["hemi", "semi"], meaning: "반, 절반 (half)", examples: "Hemiplegia (편마비), Hemiparesis (편측부전마비)" },
+      { type: "prefix", form: "hyper-", keys: ["hyper"], meaning: "과도한, 높은, 초과 (excessive, above normal)", examples: "Hypertension (고혈압), Hyperglycemia (고혈당), Hyperthyroidism (갑상선기능항진증)" },
+      { type: "prefix", form: "hypo-", keys: ["hypo"], meaning: "부족한, 낮은, 아래 (below normal, deficient)", examples: "Hypotension (저혈압), Hypoglycemia (저혈당), Hypoxia (저산소증)" },
+      { type: "prefix", form: "inter-", keys: ["inter"], meaning: "사이 (between)", examples: "Intercostal (늑간의), Intervertebral (추간의)" },
+      { type: "prefix", form: "macro- / mega-", keys: ["macro", "mega", "megalo"], meaning: "큰, 거대한 (large)", examples: "Macrophage (대식세포), Megacolon (거대결장)" },
+      { type: "prefix", form: "micro-", keys: ["micro"], meaning: "작은, 미세한 (small)", examples: "Microscope (현미경), Microangiopathy (미세혈관병증)" },
+      { type: "prefix", form: "mono- / uni-", keys: ["mono", "uni"], meaning: "하나, 단일 (one, single)", examples: "Monocyte (단핵구), Unilateral (일측성)" },
+      { type: "prefix", form: "multi- / poly-", keys: ["multi", "poly"], meaning: "많은, 다발성 (many, much)", examples: "Polyuria (다뇨증), Polydipsia (다음증), Polyneuropathy (다발신경병증)" },
+      { type: "prefix", form: "neo-", keys: ["neo"], meaning: "새로운 (new)", examples: "Neoplasm (신생물, 종양), Neonatal (신생아의)" },
+      { type: "prefix", form: "oligo-", keys: ["oligo", "olig"], meaning: "적은, 결핍 (few, scanty)", examples: "Oliguria (핍뇨), Oligodendroglioma (희소돌기아교세포종)" },
+      { type: "prefix", form: "pan-", keys: ["pan"], meaning: "전체, 모두 (all)", examples: "Pancytopenia (범혈구감소증), Pandemic (범유행)" },
+      { type: "prefix", form: "para-", keys: ["para"], meaning: "곁, 부수적, 양측하부 (beside, abnormal, lower half)", examples: "Parathyroid (부갑상선), Paraplegia (하반신마비)" },
+      { type: "prefix", form: "per-", keys: ["per"], meaning: "통하여 (through)", examples: "Percutaneous (경피적), Perfusion (관류)" },
+      { type: "prefix", form: "post-", keys: ["post"], meaning: "뒤, 이후 (after, behind)", examples: "Postoperative (수술후의), Postpartum (산후의)" },
+      { type: "prefix", form: "pseudo-", keys: ["pseudo"], meaning: "거짓, 가성 (false)", examples: "Pseudocyst (가성낭종), Pseudomembranous (위막성)" },
+      { type: "prefix", form: " quadri- / tetra-", keys: ["quadri", "tetra"], meaning: "넷, 사지 (four)", examples: "Quadriplegia (사지마비), Tetralogy (4징후)" },
+      { type: "prefix", form: "retro-", keys: ["retro"], meaning: "뒤쪽, 역행 (backward, behind)", examples: "Retroperitoneal (후복막의), Retrograde (역행성)" },
+      { type: "prefix", form: "sub- / infra-", keys: ["sub", "infra"], meaning: "아래, 밑 (under, below)", examples: "Subcutaneous (피하의), Subdural (경막하의)" },
+      { type: "prefix", form: "super- / supra-", keys: ["super", "supra"], meaning: "위, 초월 (above, beyond)", examples: "Supraventricular (심실상의), Suprapubic (치골상의)" },
+      { type: "prefix", form: "syn- / sym-", keys: ["syn", "sym"], meaning: "함께, 융합 (together, with)", examples: "Syndrome (증후군), Symbiosis (공생), Synapse (시냅스)" },
+      { type: "prefix", form: "trans-", keys: ["trans"], meaning: "가로질러, 이동 (across, through)", examples: "Transfusion (수혈), Transplantation (이식)" },
+      { type: "prefix", form: "tri-", keys: ["tri"], meaning: "셋 (three)", examples: "Tricuspid (삼첨판), Trigeminal (삼차신경)" },
+      { type: "prefix", form: "ultra-", keys: ["ultra"], meaning: "초월, 과도 (beyond)", examples: "Ultrasound (초음파)" },
+
+      // Roots (어근)
+      { type: "root", form: "aden/o", keys: ["adeno", "aden"], meaning: "샘, 선 (gland)", examples: "Adenoma (선종), Adenocarcinoma (선암), Lymphadenopathy (림프절병증)" },
+      { type: "root", form: "angi/o, vas/o", keys: ["angio", "angi", "vaso", "vascul"], meaning: "혈관, 맥관 (vessel)", examples: "Angiography (혈관조영술), Angioplasty (혈관성형술), Vasodilator (혈관확장제)" },
+      { type: "root", form: "arteri/o", keys: ["arterio", "arteri"], meaning: "동맥 (artery)", examples: "Arteriosclerosis (동맥경화증), Arteritis (동맥염)" },
+      { type: "root", form: "arthr/o", keys: ["arthro", "arthr"], meaning: "관절 (joint)", examples: "Arthritis (관절염), Arthroscopy (관절경검사), Arthroplasty (관절성형술)" },
+      { type: "root", form: "bronch/o", keys: ["broncho", "bronchi", "bronch"], meaning: "기관지 (bronchus)", examples: "Bronchitis (기관지염), Bronchoscopy (기관지경검사), Bronchiectasis (기관지확장증)" },
+      { type: "root", form: "carcin/o", keys: ["carcino", "carcin"], meaning: "암 (cancer)", examples: "Carcinoma (암종), Adenocarcinoma (선암)" },
+      { type: "root", form: "cardi/o", keys: ["cardio", "cardi"], meaning: "심장 (heart)", examples: "Cardiology (심장학), Cardiomyopathy (심근병증), Myocarditis (심근염)" },
+      { type: "root", form: "cephal/o", keys: ["cephalo", "cephal"], meaning: "머리, 두부 (head)", examples: "Hydrocephalus (수두증), Microcephaly (소두증)" },
+      { type: "root", form: "cerebr/o", keys: ["cerebro", "cerebr"], meaning: "대뇌 (cerebrum, brain)", examples: "Cerebrovascular (뇌혈관의), Cerebral (대뇌의)" },
+      { type: "root", form: "chol/e, cholecyst/o", keys: ["cholecysto", "cholecyst", "cholangio", "chole", "chol"], meaning: "담즙, 담낭 (bile, gallbladder)", examples: "Cholecystitis (담낭염), Cholecystectomy (담낭절제술), Cholangitis (담관염)" },
+      { type: "root", form: "chondr/o", keys: ["chondro", "chondr"], meaning: "연골 (cartilage)", examples: "Chondromalacia (연골연화증), Osteochondroma (골연골종)" },
+      { type: "root", form: "col/o, colon/o", keys: ["colono", "colon", "colo", "col"], meaning: "결장, 대장 (colon)", examples: "Colitis (대장염), Colonoscopy (대장내시경), Colectomy (결장절제술)" },
+      { type: "root", form: "cost/o", keys: ["costo", "cost"], meaning: "갈비뼈, 늑골 (rib)", examples: "Intercostal (늑간의), Costochondritis (늑연골염)" },
+      { type: "root", form: "crani/o", keys: ["cranio", "crani"], meaning: "두개골 (skull, cranium)", examples: "Craniotomy (개두술), Craniectomy (두개골절제술)" },
+      { type: "root", form: "cyan/o", keys: ["cyano", "cyan"], meaning: "청색 (blue)", examples: "Cyanosis (청색증)" },
+      { type: "root", form: "cyst/o", keys: ["cysto", "cyst"], meaning: "방광, 낭종 (urinary bladder, cyst)", examples: "Cystitis (방광염), Cystoscopy (방광경검사)" },
+      { type: "root", form: "cyt/o", keys: ["cyto", "cyt"], meaning: "세포 (cell)", examples: "Erythrocyte (적혈구), Leukocyte (백혈구), Thrombocytopenia (혈소판감소증)" },
+      { type: "root", form: "derm/o, dermat/o", keys: ["dermato", "dermat", "dermo", "derm"], meaning: "피부 (skin)", examples: "Dermatitis (피부염), Dermatology (피부과학), Subdermal (피하의)" },
+      { type: "root", form: "duoden/o", keys: ["duodeno", "duoden"], meaning: "십이지장 (duodenum)", examples: "Duodenitis (십이지장염), Duodenal ulcer (십이지장궤양)" },
+      { type: "root", form: "electr/o", keys: ["electro", "electr"], meaning: "전기 (electricity)", examples: "Electrocardiogram (심전도), Electroencephalogram (뇌파)" },
+      { type: "root", form: "encephal/o", keys: ["encephalo", "encephal"], meaning: "뇌 (brain)", examples: "Encephalitis (뇌염), Encephalopathy (뇌병증)" },
+      { type: "root", form: "enter/o", keys: ["entero", "enter"], meaning: "장, 소장 (intestine)", examples: "Enteritis (장염), Gastroenteritis (위장염)" },
+      { type: "root", form: "erythr/o", keys: ["erythro", "erythr"], meaning: "붉은, 적혈구 (red)", examples: "Erythrocyte (적혈구), Erythema (홍반)" },
+      { type: "root", form: "esophag/o", keys: ["esophago", "esophag"], meaning: "식도 (esophagus)", examples: "Esophagitis (식도염), Esophagogastroduodenoscopy (상부위장관내시경)" },
+      { type: "root", form: "gastr/o", keys: ["gastro", "gastr"], meaning: "위 (stomach)", examples: "Gastritis (위염), Gastrectomy (위절제술), Gastroscopy (위내시경)" },
+      { type: "root", form: "glyc/o, gluc/o", keys: ["glyco", "glyc", "gluco", "gluc"], meaning: "당, 포도당 (sugar, glucose)", examples: "Hyperglycemia (고혈당), Hypoglycemia (저혈당), Glycosuria (당뇨)" },
+      { type: "root", form: "gynec/o", keys: ["gyneco", "gynec"], meaning: "여성 (woman, female)", examples: "Gynecology (부인과), Gynecomastia (여성형유방)" },
+      { type: "root", form: "hem/o, hemat/o", keys: ["hemato", "hemat", "hemo", "hem"], meaning: "혈액 (blood)", examples: "Hematoma (혈종), Hemorrhage (출혈), Hematuria (혈뇨), Hemoglobin (혈색소)" },
+      { type: "root", form: "hepat/o", keys: ["hepato", "hepat"], meaning: "간 (liver)", examples: "Hepatitis (간염), Hepatomegaly (간비대), Hepatocellular (간세포의)" },
+      { type: "root", form: "hist/o", keys: ["histo", "hist"], meaning: "조직 (tissue)", examples: "Histology (조직학), Histopathology (조직병리학)" },
+      { type: "root", form: "hyster/o, metr/o", keys: ["hystero", "hyster", "metro", "endometri"], meaning: "자궁 (uterus)", examples: "Hysterectomy (자궁절제술), Endometriosis (자궁내막증)" },
+      { type: "root", form: "ile/o", keys: ["ileo", "ile"], meaning: "회장 (ileum)", examples: "Ileostomy (회장루술), Ileus (장폐색)" },
+      { type: "root", form: "lapar/o", keys: ["laparo", "lapar"], meaning: "복부, 복벽 (abdomen)", examples: "Laparoscopy (복강경검사), Laparotomy (개복술)" },
+      { type: "root", form: "laryng/o", keys: ["laryngo", "laryng"], meaning: "후두 (larynx)", examples: "Laryngitis (후두염), Laryngoscopy (후두경검사)" },
+      { type: "root", form: "leuk/o", keys: ["leuko", "leuk"], meaning: "흰색, 백혈구 (white)", examples: "Leukocyte (백혈구), Leukemia (백혈병), Leukocytosis (백혈구증가증)" },
+      { type: "root", form: "lip/o, adip/o", keys: ["lipo", "lip", "adipo", "adip"], meaning: "지방 (fat, lipid)", examples: "Lipoma (지방종), Hyperlipidemia (고지혈증)" },
+      { type: "root", form: "lith/o", keys: ["litho", "lith"], meaning: "돌, 결석 (stone, calculus)", examples: "Cholelithiasis (담석증), Nephrolithiasis (신장결석증)" },
+      { type: "root", form: "lymph/o", keys: ["lympho", "lymph"], meaning: "림프 (lymph)", examples: "Lymphoma (림프종), Lymphedema (림프부종)" },
+      { type: "root", form: "mamm/o, mast/o", keys: ["mammo", "mamm", "masto", "mast"], meaning: "유방 (breast)", examples: "Mammography (유방촬영술), Mastectomy (유방절제술), Mastitis (유선염)" },
+      { type: "root", form: "mening/o", keys: ["meningo", "mening"], meaning: "뇌척수막, 수막 (meninges)", examples: "Meningitis (수막염), Meningioma (수막종)" },
+      { type: "root", form: "my/o, muscul/o", keys: ["myo", "my", "musculo"], meaning: "근육 (muscle)", examples: "Myocardium (심근), Myalgia (근육통), Rhabdomyolysis (횡문근융해증)" },
+      { type: "root", form: "myel/o", keys: ["myelo", "myel"], meaning: "골수, 척수 (bone marrow, spinal cord)", examples: "Myeloma (골수종), Osteomyelitis (골수염), Myelopathy (척수병증)" },
+      { type: "root", form: "necr/o", keys: ["necro", "necr"], meaning: "죽음, 괴사 (death)", examples: "Necrosis (괴사), Necrotizing (괴사성)" },
+      { type: "root", form: "nephr/o, ren/o", keys: ["nephro", "nephr", "reno", "ren"], meaning: "신장, 콩팥 (kidney)", examples: "Nephritis (신장염), Nephrectomy (신장절제술), Nephropathy (신장병증)" },
+      { type: "root", form: "neur/o", keys: ["neuro", "neur"], meaning: "신경 (nerve)", examples: "Neurology (신경학), Neuropathy (신경병증), Neuralgia (신경통)" },
+      { type: "root", form: "onc/o", keys: ["onco", "onc"], meaning: "종양 (tumor)", examples: "Oncology (종양학), Oncogene (종양유전자)" },
+      { type: "root", form: "oophor/o, ovari/o", keys: ["oophoro", "oophor", "ovario"], meaning: "난소 (ovary)", examples: "Oophorectomy (난소절제술)" },
+      { type: "root", form: "ophthalm/o, ocul/o", keys: ["ophthalmo", "ophthalm", "oculo"], meaning: "눈, 안구 (eye)", examples: "Ophthalmology (안과학), Ophthalmoscope (검안경)" },
+      { type: "root", form: "oste/o", keys: ["osteo", "oste"], meaning: "뼈, 골 (bone)", examples: "Osteoporosis (골다공증), Osteoarthritis (골관절염), Osteomyelitis (골수염)" },
+      { type: "root", form: "ot/o", keys: ["oto", "ot"], meaning: "귀 (ear)", examples: "Otitis media (중이염), Otorhinolaryngology (이비인후과)" },
+      { type: "root", form: "pancreat/o", keys: ["pancreato", "pancreat"], meaning: "췌장 (pancreas)", examples: "Pancreatitis (췌장염), Pancreatectomy (췌장절제술)" },
+      { type: "root", form: "path/o", keys: ["patho", "path"], meaning: "질병 (disease)", examples: "Pathology (병리학), Pathogen (병원체)" },
+      { type: "root", form: "pharyng/o", keys: ["pharyngo", "pharyng"], meaning: "인두 (pharynx)", examples: "Pharyngitis (인두염), Nasopharynx (비인두)" },
+      { type: "root", form: "phleb/o, ven/o", keys: ["phlebo", "phleb", "veno", "ven"], meaning: "정맥 (vein)", examples: "Phlebitis (정맥염), Thrombophlebitis (혈전정맥염), Venipuncture (정맥천자)" },
+      { type: "root", form: "pneum/o, pneumon/o, pulmon/o", keys: ["pneumono", "pneumon", "pneumo", "pneum", "pulmono", "pulmon"], meaning: "폐, 공기 (lung, air)", examples: "Pneumonia (폐렴), Pneumothorax (기흉), Pulmonary (폐의)" },
+      { type: "root", form: "proct/o, rect/o", keys: ["procto", "proct", "recto", "rect"], meaning: "직장, 항문 (rectum, anus)", examples: "Proctoscopy (직장경검사), Colorectal (대장직장의)" },
+      { type: "root", form: "psych/o", keys: ["psycho", "psych"], meaning: "정신, 마음 (mind)", examples: "Psychiatry (정신의학), Psychosis (정신병)" },
+      { type: "root", form: "pyel/o", keys: ["pyelo", "pyel"], meaning: "신우 (renal pelvis)", examples: "Pyelonephritis (신우신염)" },
+      { type: "root", form: "rhin/o, nas/o", keys: ["rhino", "rhin", "naso"], meaning: "코 (nose)", examples: "Rhinitis (비염), Rhinorrhea (콧물), Rhinoplasty (코성형술)" },
+      { type: "root", form: "salping/o", keys: ["salpingo", "salping"], meaning: "난관, 나팔관 (fallopian tube)", examples: "Salpingitis (난관염), Salpingectomy (난관절제술)" },
+      { type: "root", form: "sarc/o", keys: ["sarco", "sarc"], meaning: "육종, 결합조직/살 (flesh, connective tissue)", examples: "Sarcoma (육종), Sarcopenia (근감소증)" },
+      { type: "root", form: "splen/o", keys: ["spleno", "splen"], meaning: "비장, 지라 (spleen)", examples: "Splenomegaly (비장비대), Splenectomy (비장절제술)" },
+      { type: "root", form: "spondyl/o, vertebr/o", keys: ["spondylo", "spondyl", "vertebro"], meaning: "척추 (vertebra, spine)", examples: "Spondylitis (척추염), Spondylolisthesis (척추전방전위증)" },
+      { type: "root", form: "stomat/o, or/o", keys: ["stomato", "stomat", "oro"], meaning: "입, 구강 (mouth)", examples: "Stomatitis (구내염)" },
+      { type: "root", form: "thorac/o", keys: ["thoraco", "thorac", "thorax"], meaning: "가슴, 흉곽 (chest, thorax)", examples: "Thoracentesis (흉강천자), Pneumothorax (기흉), Thoracotomy (개흉술)" },
+      { type: "root", form: "thromb/o", keys: ["thrombo", "thromb"], meaning: "혈전, 응고 (clot)", examples: "Thrombosis (혈전증), Thrombolysis (혈전용해), Thrombocytopenia (혈소판감소증)" },
+      { type: "root", form: "thyr/o", keys: ["thyro", "thyr", "thyroid"], meaning: "갑상선 (thyroid gland)", examples: "Thyroiditis (갑상선염), Hyperthyroidism (갑상선기능항진증)" },
+      { type: "root", form: "trache/o", keys: ["tracheo", "trache"], meaning: "기관 (trachea)", examples: "Tracheostomy (기관절개술), Tracheitis (기관염)" },
+      { type: "root", form: "ur/o, urin/o", keys: ["urino", "urin", "uro", "ur"], meaning: "소변, 요로 (urine, urinary tract)", examples: "Urology (비뇨의학), Uremia (요독증), Hematuria (혈뇨)" },
+
+      // Suffixes (접미사)
+      { type: "suffix", form: "-algia / -dynia", keys: ["algia", "dynia"], meaning: "통증 (pain)", examples: "Myalgia (근육통), Neuralgia (신경통), Arthralgia (관절통)" },
+      { type: "suffix", form: "-centesis", keys: ["centesis"], meaning: "천자, 바늘로 액체 뽑기 (surgical puncture to remove fluid)", examples: "Amniocentesis (양수천자), Thoracentesis (흉강천자), Paracentesis (복수천자)" },
+      { type: "suffix", form: "-cyte", keys: ["cyte", "cytes"], meaning: "세포 (cell)", examples: "Erythrocyte (적혈구), Leukocyte (백혈구), Hepatocyte (간세포)" },
+      { type: "suffix", form: "-ectasis / -ectasia", keys: ["ectasis", "ectasia"], meaning: "확장, 팽창 (dilation, expansion)", examples: "Bronchiectasis (기관지확장증), Atelectasis (무기폐)" },
+      { type: "suffix", form: "-ectomy", keys: ["ectomy"], meaning: "절제술, 제거술 (surgical removal, excision)", examples: "Appendectomy (충수절제술), Gastrectomy (위절제술), Cholecystectomy (담낭절제술)" },
+      { type: "suffix", form: "-edema", keys: ["edema"], meaning: "부종, 부기 (swelling)", examples: "Lymphedema (림프부종), Pulmonary edema (폐부종)" },
+      { type: "suffix", form: "-emia", keys: ["emia"], meaning: "혈액 상태 (blood condition)", examples: "Anemia (빈혈), Leukemia (백혈병), Hyperglycemia (고혈당), Sepsis/Septicemia (패혈증)" },
+      { type: "suffix", form: "-genesis / -genic", keys: ["genesis", "genic"], meaning: "생성, 유발하는 (producing, forming)", examples: "Pathogenesis (발병기전), Carcinogenic (발암성의), Iatrogenic (의원성의)" },
+      { type: "suffix", form: "-gram", keys: ["gram"], meaning: "기록, 촬영 결과물 (record, image)", examples: "Electrocardiogram (심전도), Mammogram (유방촬영상), Angiogram (혈관조영상)" },
+      { type: "suffix", form: "-graph", keys: ["graph"], meaning: "기록하는 장치 (instrument for recording)", examples: "Electrocardiograph (심전도계)" },
+      { type: "suffix", form: "-graphy", keys: ["graphy"], meaning: "기록하는 과정, 촬영술 (process of recording)", examples: "Angiography (혈관조영술), Ultrasonography (초음파검사), Tomography (단층촬영술)" },
+      { type: "suffix", form: "-ia / -iasis / -osis", keys: ["iasis", "osis", "ia"], meaning: "비정상 상태, 병적 증상 (abnormal condition)", examples: "Pneumonia (폐렴), Cholelithiasis (담석증), Necrosis (괴사), Fibrosis (섬유증)" },
+      { type: "suffix", form: "-itis", keys: ["itis"], meaning: "염증 (inflammation)", examples: "Gastritis (위염), Hepatitis (간염), Arthritis (관절염), Meningitis (수막염)" },
+      { type: "suffix", form: "-lithiasis", keys: ["lithiasis"], meaning: "결석증 (presence of stones)", examples: "Cholelithiasis (담석증), Urolithiasis (요로결석증)" },
+      { type: "suffix", form: "-logy", keys: ["logy"], meaning: "학문, 연구 (study of)", examples: "Cardiology (심장학), Neurology (신경학), Pathology (병리학)" },
+      { type: "suffix", form: "-lysis", keys: ["lysis"], meaning: "분해, 용해, 파괴 (breakdown, destruction)", examples: "Hemolysis (용혈), Thrombolysis (혈전용해), Dialysis (투석)" },
+      { type: "suffix", form: "-malacia", keys: ["malacia"], meaning: "연화증 (softening)", examples: "Osteomalacia (골연화증), Chondromalacia (연골연화증)" },
+      { type: "suffix", form: "-megaly", keys: ["megaly"], meaning: "비대, 커짐 (enlargement)", examples: "Cardiomegaly (심비대), Hepatomegaly (간비대), Splenomegaly (비장비대)" },
+      { type: "suffix", form: "-oma", keys: ["oma", "omas"], meaning: "종양, 혹, 종괴 (tumor, mass)", examples: "Carcinoma (암종), Sarcoma (육종), Lymphoma (림프종), Hematoma (혈종)" },
+      { type: "suffix", form: "-opsy", keys: ["opsy"], meaning: "검사, 관찰 (view of, examination)", examples: "Biopsy (생검, 조직검사), Autopsy (부검)" },
+      { type: "suffix", form: "-ostomy", keys: ["ostomy", "stomy"], meaning: "개구술, 누공형성술 (creating a new opening/stoma)", examples: "Colostomy (결장루술), Tracheostomy (기관절개술), Ileostomy (회장루술)" },
+      { type: "suffix", form: "-otomy", keys: ["otomy", "tomy"], meaning: "절개술 (cutting into, incision)", examples: "Craniotomy (개두술), Laparotomy (개복술), Thoracotomy (개흉술)" },
+      { type: "suffix", form: "-pathy", keys: ["pathy"], meaning: "질병, 병증 (disease, emotion)", examples: "Neuropathy (신경병증), Cardiomyopathy (심근병증), Encephalopathy (뇌병증)" },
+      { type: "suffix", form: "-penia", keys: ["penia"], meaning: "감소증, 결핍 (deficiency, decrease)", examples: "Leukopenia (백혈구감소증), Thrombocytopenia (혈소판감소증), Osteopenia (골감소증)" },
+      { type: "suffix", form: "-pexy", keys: ["pexy"], meaning: "고정술 (surgical fixation)", examples: "Nephropexy (신장고정술), Orchiopexy (고환고정술)" },
+      { type: "suffix", form: "-phagia", keys: ["phagia"], meaning: "먹기, 삼키기 (eating, swallowing)", examples: "Dysphagia (연하곤란), Polyphagia (다식증)" },
+      { type: "suffix", form: "-phasia", keys: ["phasia"], meaning: "말하기, 언어 (speech)", examples: "Aphasia (실어증), Dysphasia (언어장애)" },
+      { type: "suffix", form: "-plasty", keys: ["plasty"], meaning: "성형술, 복원술 (surgical repair)", examples: "Angioplasty (혈관성형술), Arthroplasty (관절성형술), Rhinoplasty (코성형술)" },
+      { type: "suffix", form: "-plegia", keys: ["plegia"], meaning: "마비 (paralysis)", examples: "Hemiplegia (편마비), Paraplegia (하반신마비), Quadriplegia (사지마비)" },
+      { type: "suffix", form: "-pnea", keys: ["pnea"], meaning: "호흡 (breathing)", examples: "Dyspnea (호흡곤란), Apnea (무호흡), Tachypnea (빈호흡), Orthopnea (기좌호흡)" },
+      { type: "suffix", form: "-poiesis", keys: ["poiesis"], meaning: "형성, 조혈 (formation)", examples: "Hematopoiesis (조혈), Erythropoiesis (적혈구생성)" },
+      { type: "suffix", form: "-ptosis", keys: ["ptosis"], meaning: "하수, 처짐 (drooping, prolapse)", examples: "Ptosis (안검하수), Nephroptosis (신장하수)" },
+      { type: "suffix", form: "-rrhage / -rrhagia", keys: ["rrhage", "rrhagia"], meaning: "과다출혈, 터져나옴 (bursting forth, excessive flow)", examples: "Hemorrhage (출혈), Menorrhagia (월경과다)" },
+      { type: "suffix", form: "-rrhea", keys: ["rrhea"], meaning: "분비, 유출, 설사 (flow, discharge)", examples: "Diarrhea (설사), Rhinorrhea (콧물, 비루), Amenorrhea (무월경)" },
+      { type: "suffix", form: "-sclerosis", keys: ["sclerosis"], meaning: "경화증, 딱딱해짐 (hardening)", examples: "Atherosclerosis (죽상동맥경화증), Multiple sclerosis (다발성경화증)" },
+      { type: "suffix", form: "-scope", keys: ["scope"], meaning: "관찰 기구, 내시경 (instrument for visual examination)", examples: "Endoscope (내시경), Stethoscope (청진기), Bronchoscope (기관지경)" },
+      { type: "suffix", form: "-scopy", keys: ["scopy"], meaning: "내시경 검사법 (visual examination)", examples: "Endoscopy (내시경검사), Colonoscopy (대장내시경검사), Laparoscopy (복강경검사)" },
+      { type: "suffix", form: "-spasm", keys: ["spasm"], meaning: "경련, 연축 (involuntary contraction)", examples: "Bronchospasm (기관지경련), Vasospasm (혈관연축)" },
+      { type: "suffix", form: "-stasis", keys: ["stasis"], meaning: "정체, 지혈, 멈춤 (stopping, controlling)", examples: "Hemostasis (지혈), Metastasis (전이), Cholestasis (담즙정체)" },
+      { type: "suffix", form: "-stenosis", keys: ["stenosis"], meaning: "협착, 좁아짐 (narrowing, stricture)", examples: "Aortic stenosis (대동맥판협착증), Spinal stenosis (척추관협착증)" },
+      { type: "suffix", form: "-uria", keys: ["uria"], meaning: "소변 상태, 배뇨 (urination, urine condition)", examples: "Hematuria (혈뇨), Dysuria (배뇨곤란), Polyuria (다뇨증), Anuria (무뇨증)" }
+    ];
+
+    // =========================================================================
+    // 2. 의학용어 사전 데이터 (MEDICAL_TERMS: 325개 이상)
+    // 형식: [영문명, 한글명, 약어, 분류, 설명, 어원분해표시]
+    // =========================================================================
+    const RAW_TERMS = [
+      // 1) 심혈관 (Cardiovascular) - 42개
+      ["Myocardial Infarction", "심근경색(증)", "MI", "심혈관", "관상동맥이 막혀 심장근육(심근) 조직에 산소와 영양 공급이 차단되어 괴사하는 응급 질환.", "my/o(근육) + cardi/o(심장) + -al(의) / infarct(경색)"],
+      ["Angina Pectoris", "협심증", "AP", "심혈관", "관상동맥의 협착으로 심근에 혈류가 일시적으로 부족해져 발생하는 흉통 증후군.", "angi/o(혈관/조임) + pectoris(가슴)"],
+      ["Hypertension", "고혈압", "HTN", "심혈관", "동맥 혈압이 정상 범위(120/80 mmHg)보다 지속적으로 높게 유지되는 상태.", "hyper-(과도한) + tens(압력) + -ion(상태)"],
+      ["Hypotension", "저혈압", "BP↓", "심혈관", "동맥 혈압이 비정상적으로 낮아 어지러움이나 실신, 쇼크를 유발할 수 있는 상태.", "hypo-(낮은) + tens(압력) + -ion(상태)"],
+      ["Tachycardia", "빈맥", "HR↑", "심혈관", "심장 박동수가 분당 100회 이상으로 비정상적으로 빠르게 뛰는 상태.", "tachy-(빠른) + cardi/o(심장) + -ia(상태)"],
+      ["Bradycardia", "서맥", "HR↓", "심혈관", "심장 박동수가 분당 60회 미만으로 비정상적으로 느리게 뛰는 상태.", "brady-(느린) + cardi/o(심장) + -ia(상태)"],
+      ["Congestive Heart Failure", "울혈성 심부전", "CHF", "심혈관", "심장의 펌프 기능 저하로 전신에 충분한 혈액을 보내지 못하고 폐나 말초에 혈액이 고이는 질환.", "congestive(울혈성) + heart failure(심부전)"],
+      ["Atrial Fibrillation", "심방세동", "AF / A-fib", "심혈관", "심방이 규칙적으로 수축하지 못하고 가늘고 불규칙하게 떨리는 흔한 부정맥.", "atri/o(심방) + -al / fibrill/o(세동)"],
+      ["Ventricular Fibrillation", "심실세동", "VF / V-fib", "심혈관", "심실이 무질서하게 떨려 혈액을 박출하지 못하는 치명적인 응급 부정맥.", "ventricul/o(심실) + fibrill/o(세동)"],
+      ["Ventricular Tachycardia", "심실빈맥", "VT / V-tach", "심혈관", "심실에서 기원한 빠른 빈맥으로 심실세동으로 이행할 수 있는 위험한 부정맥.", "ventricul/o(심실) + tachy-(빠른) + cardi/o(심장) + -ia"],
+      ["Supraventricular Tachycardia", "심실상성 빈맥", "SVT", "심혈관", "심실 위쪽(심방 또는 방실접합부)에서 발생하는 발작성 빠른 맥박.", "supra-(위) + ventricul/o(심실) + tachy-(빠른) + cardi/o(심장)"],
+      ["Coronary Artery Disease", "관상동맥질환", "CAD", "심혈관", "심장 근육에 혈액을 공급하는 관상동맥이 죽상경화 등으로 좁아지거나 막히는 질환.", "coron/o(관상) + arteri/o(동맥) + disease"],
+      ["Acute Coronary Syndrome", "급성 관상동맥 증후군", "ACS", "심혈관", "불안정 협심증과 급성 심근경색을 포함하는 급성 심장 허혈 상태.", "acute(급성) + coronary(관상동맥) + syn-(함께)+drome(증후군)"],
+      ["Atherosclerosis", "죽상동맥경화증", "AS", "심혈관", "동맥 내벽에 콜레스테롤과 플라크(죽종)가 쌓여 혈관이 좁아지고 딱딱해지는 질환.", "ather/o(죽종, 지방찌꺼기) + -sclerosis(경화증)"],
+      ["Arteriosclerosis", "동맥경화증", "AS", "심혈관", "동맥 벽이 탄력을 잃고 두꺼워지며 단단해지는 병적 상태.", "arteri/o(동맥) + -sclerosis(경화증)"],
+      ["Cardiomyopathy", "심근병증", "CMP", "심혈관", "심장 근육 자체의 구조적·기능적 이상으로 심장 기능이 저하되는 질환.", "cardi/o(심장) + my/o(근육) + -pathy(병증)"],
+      ["Endocarditis", "심내막염", "IE", "심혈관", "심장의 내벽(심내막)이나 판막에 세균 침투 등으로 염증이 발생하는 질환.", "endo-(안) + cardi/o(심장) + -itis(염증)"],
+      ["Myocarditis", "심근염", "MC", "심혈관", "바이러스 감염이나 자가면역 반응 등으로 심장 근육에 발생하는 염증.", "my/o(근육) + cardi/o(심장) + -itis(염증)"],
+      ["Pericarditis", "심낭염(심막염)", "PC", "심혈관", "심장을 둘러싼 주머니인 심낭에 염증이 생겨 흉통과 심낭삼출을 유발하는 질환.", "peri-(주위) + cardi/o(심장) + -itis(염증)"],
+      ["Cardiac Tamponade", "심장압전(심낭압전)", "CT", "심혈관", "심낭강에 혈액이나 액체가 급격히 고여 심장을 압박해 이완을 방해하는 응급 상태.", "cardi/o(심장) + tamponade(압전)"],
+      ["Cardiomegaly", "심장비대(심비대)", "CM", "심혈관", "고혈압이나 판막질환 등으로 인해 심장의 크기가 비정상적으로 커진 상태.", "cardi/o(심장) + -megaly(비대)"],
+      ["Electrocardiogram", "심전도", "ECG / EKG", "심혈관", "심장의 전기적 활동 신호를 피부 전극을 통해 측정하여 기록한 파형.", "electr/o(전기) + cardi/o(심장) + -gram(기록)"],
+      ["Echocardiography", "심장초음파검사", "Echo", "심혈관", "초음파를 이용해 심장의 구조, 판막 움직임, 수축력을 실시간으로 관찰하는 검사.", "echo(초음파) + cardi/o(심장) + -graphy(촬영술)"],
+      ["Angiography", "혈관조영술", "Angio", "심혈관", "혈관 내에 조영제를 주입하고 방사선(X선) 촬영을 하여 혈관의 협착·폐색을 확인하는 검사.", "angi/o(혈관) + -graphy(촬영술)"],
+      ["Percutaneous Coronary Intervention", "경피적 관상동맥 중재술", "PCI", "심혈관", "피부를 통해 카테터를 삽입하여 좁아진 관상동맥을 풍선이나 스텐트로 넓히는 시술.", "per-(통하여) + cutane/o(피부) + coronary intervention"],
+      ["Coronary Artery Bypass Graft", "관상동맥 우회로 이식술", "CABG", "심혈관", "막힌 관상동맥 부위를 우회하여 다른 혈관을 연결해 심근 혈류를 복원하는 수술.", "coronary artery + bypass + graft"],
+      ["Deep Vein Thrombosis", "심부정맥혈전증", "DVT", "심혈관", "하지 등 깊은 곳에 위치한 정맥 내부에 혈전(피떡)이 형성되는 질환.", "deep vein(심부정맥) + thromb/o(혈전) + -osis(상태)"],
+      ["Aortic Aneurysm", "대동맥류", "AA / AAA", "심혈관", "대동맥 벽이 약해져 풍선처럼 비정상적으로 부풀어 오르는 질환으로 파열 위험이 있음.", "aort/o(대동맥) + aneurysm(동맥류)"],
+      ["Aortic Dissection", "대동맥박리", "AD", "심혈관", "대동맥 내막이 찢어지면서 혈액이 혈관 벽 사이로 파고들어 층이 분리되는 초응급 질환.", "aort/o(대동맥) + dissection(박리)"],
+      ["Aortic Stenosis", "대동맥판막 협착증", "AS", "심혈관", "좌심실에서 대동맥으로 나가는 대동맥판막이 좁아져 혈류 박출이 힘들어지는 판막 질환.", "aort/o(대동맥) + -stenosis(협착)"],
+      ["Mitral Regurgitation", "승모판 역류증", "MR", "심혈관", "좌심실 수축 시 승모판이 완전히 닫히지 않아 혈액이 좌심방으로 역류하는 질환.", "mitr/o(승모판) + regurgitation(역류)"],
+      ["Arrhythmia", "부정맥", "Arr", "심혈관", "심장의 전기 자극 생성이나 전달에 이상이 생겨 심박동이 불규칙해지는 상태.", "a-(없음) +andr/rhythm(리듬) + -ia(상태)"],
+      ["Atrioventricular Block", "방실차단", "AV Block", "심혈관", "심방에서 심실로 전달되는 전기 신호가 지연되거나 차단되는 전도 장애.", "atri/o(심방) + ventricul/o(심실) + block"],
+      ["Cardiopulmonary Resuscitation", "심폐소생술", "CPR", "심혈관", "심정지 환자에서 흉부 압박과 인공호흡을 통해 뇌와 장기에 혈류를 유지시키는 응급 처치.", "cardi/o(심장) + pulmon/o(폐) + resuscitation(소생술)"],
+      ["Peripheral Arterial Disease", "말초동맥질환", "PAD", "심혈관", "팔이나 다리(주로 하지)로 가는 말초 동맥이 좁아져 파행증과 허혈을 일으키는 질환.", "peripher/o(말초) + arteri/o(동맥) + disease"],
+      ["Thrombophlebitis", "혈전정맥염", "TP", "심혈관", "혈전 형성과 함께 정맥 혈관벽에 염증이 발생하는 상태.", "thromb/o(혈전) + phleb/o(정맥) + -itis(염증)"],
+      ["Varicose Vein", "정맥류(하지정맥류)", "VV", "심혈관", "정맥 판막 기능 부전으로 표재 정맥이 비정상적으로 확장되고 구불구불해지는 질환.", "varic/o(정맥류) + vein(정맥)"],
+      ["Ischemia", "허혈", "Isc", "심혈관", "혈관 수축이나 폐색으로 인해 조직에 필요한 동맥혈 공급이 부족해진 상태.", "isch/o(억제, 막음) + -emia(혈액상태)"],
+      ["Syncope", "실신", "Syn", "심혈관", "뇌 혈류량이 일시적으로 감소하여 의식을 잃고 쓰러졌다가 곧 회복되는 증상.", "syn-(함께) + cope(단절)"],
+      ["Palpitation", "심계항진(두근거림)", "Palp", "심혈관", "자신의 심장 박동을 불쾌하거나 빠르게 느껴 인지하는 증상.", "palpit/o(두근거리다) + -ation"],
+      ["Patent Ductus Arteriosus", "동맥관개존증", "PDA", "심혈관", "출생 후 닫혀야 할 대동맥과 폐동맥 사이의 동맥관이 계속 열려 있는 선천성 심질환.", "patent(열린) + ductus arteriosus(동맥관)"],
+      ["Ventricular Septal Defect", "심실중격결손", "VSD", "심혈관", "좌심실과 우심실 사이의 벽(중격)에 구멍이 남아 있는 흔한 선천성 심장 기형.", "ventricul/o(심실) + sept/o(중격) + defect(결손)"],
+
+      // 2) 호흡기 (Respiratory) - 36개
+      ["Chronic Obstructive Pulmonary Disease", "만성 폐쇄성 폐질환", "COPD", "호흡기", "기도가 만성적으로 좁아져 기류 제한과 호흡곤란이 지속되는 만성 호흡기 질환.", "chron/o(만성) + obstructive + pulmon/o(폐) + disease"],
+      ["Pneumonia", "폐렴", "PNA", "호흡기", "세균, 바이러스, 곰팡이 등의 감염으로 폐포와 폐 실질 조직에 염증이 발생하는 질환.", "pneumon/o(폐) + -ia(병적상태)"],
+      ["Asthma", "천식", "BA", "호흡기", "기관지의 만성 염증과 과민성으로 인해 천명음(쌕쌕거림), 기침, 호흡곤란이 반복되는 질환.", "asthma(숨가쁨)"],
+      ["Pneumothorax", "기흉", "PTX", "호흡기", "흉막강(가슴막 공간) 내에 공기가 차서 폐가 짜부러지는(허탈되는) 질환.", "pneum/o(공기) + thorax(흉곽)"],
+      ["Hemothorax", "혈흉", "HTX", "호흡기", "외상이나 질환으로 인해 흉막강 내에 혈액이 고이는 상태.", "hem/o(혈액) + thorax(흉곽)"],
+      ["Pleural Effusion", "흉수(흉막삼출)", "PE", "호흡기", "폐를 둘러싼 두 흉막 사이의 공간에 비정상적으로 체액이 많이 고이는 상태.", "pleur/o(흉막) + effusion(삼출)"],
+      ["Pulmonary Embolism", "폐색전증", "PE", "호흡기", "심부정맥 등에서 떨어져 나온 혈전이 폐동맥을 막아 발생하는 급성 치명적 호흡기 질환.", "pulmon/o(폐) + embol/o(색전) + -ism"],
+      ["Acute Respiratory Distress Syndrome", "급성 호흡곤란 증후군", "ARDS", "호흡기", "심한 염증으로 폐포-모세혈관 장벽이 손상되어 비심인성 폐부종과 중증 저산소증을 일으키는 상태.", "acute + respiratory + distress + syndrome"],
+      ["Pulmonary Edema", "폐부종", "PE", "호흡기", "폐의 간질조직과 폐포 내에 체액이 비정상적으로 차올라 가스 교환이 방해받는 상태.", "pulmon/o(폐) + -edema(부종)"],
+      ["Bronchitis", "기관지염", "CB", "호흡기", "기관지 점막에 바이러스나 세균, 자극 물질로 인해 염증이 생기는 질환.", "bronch/o(기관지) + -itis(염증)"],
+      ["Bronchiectasis", "기관지확장증", "BE", "호흡기", "기관지 벽의 탄력 및 근육층이 파괴되어 기관지가 영구적으로 비정상 확장된 상태.", "bronchi/o(기관지) + -ectasis(확장)"],
+      ["Atelectasis", "무기폐", "Atel", "호흡기", "폐의 일부 또는 전체 폐포에 공기가 없어져 폐가 팽창하지 못하고 쭈그러든 상태.", "atel/o(불완전한) + -ectasis(확장)"],
+      ["Dyspnea", "호흡곤란", "SOB / DOE", "호흡기", "숨쉬기가 힘들거나 숨이 차다고 느끼는 주관적인 호흡 불편감.", "dys-(곤란한) + -pnea(호흡)"],
+      ["Apnea", "무호흡", "Apn", "호흡기", "호흡이 일시적으로 완전히 멈추는 상태.", "a-(없음) + -pnea(호흡)"],
+      ["Obstructive Sleep Apnea", "폐쇄성 수면무호흡증", "OSA", "호흡기", "수면 중 상기도가 반복적으로 좁아지거나 막혀 무호흡과 저산소증을 유발하는 질환.", "obstructive + sleep + a-(없음) + -pnea(호흡)"],
+      ["Tachypnea", "빈호흡", "RR↑", "호흡기", "호흡수가 정상보다 비정상적으로 빨라진 상태 (성인 기준 분당 20회 초과).", "tachy-(빠른) + -pnea(호흡)"],
+      ["Bradypnea", "서호흡", "RR↓", "호흡기", "호흡수가 정상보다 비정상적으로 느려진 상태 (성인 기준 분당 12회 미만).", "brady-(느린) + -pnea(호흡)"],
+      ["Orthopnea", "기좌호흡", "Orth", "호흡기", "누우면 숨이 차고 앉거나 상체를 세우면 호흡이 편해지는 증상 (주로 좌심부전에서 발생).", "orth/o(곧은, 바른) + -pnea(호흡)"],
+      ["Hemoptysis", "객혈", "Hemo", "호흡기", "기도나 폐에서 나온 혈액이 기침과 함께 섞여 나오는 증상.", "hem/o(혈액) + -ptysis(뱉기)"],
+      ["Hypoxia", "저산소증", "SpO2↓", "호흡기", "신체 조직이나 세포에 도달하는 산소 공급량이 정상보다 부족한 상태.", "hypo-(부족한) + ox/o(산소) + -ia(상태)"],
+      ["Hypoxemia", "저산소혈증", "PaO2↓", "호흡기", "동맥혈 내의 산소 분압(PaO2)이나 산소 포화도가 정상 이하로 떨어진 상태.", "hypo-(낮은) + ox/o(산소) + -emia(혈액상태)"],
+      ["Hypercapnia", "고탄산혈증(과탄산혈증)", "PaCO2↑", "호흡기", "환기 부전 등으로 인해 혈액 내 이산화탄소(CO2) 농도가 비정상적으로 높아진 상태.", "hyper-(과도한) + capn/o(이산화탄소) + -ia"],
+      ["Cyanosis", "청색증", "Cyan", "호흡기", "혈액 내 산소 부족(환원 헤모글로빈 증가)으로 입술이나 손끝 피부가 푸르게 보이는 증상.", "cyan/o(청색) + -osis(상태)"],
+      ["Pulmonary Tuberculosis", "폐결핵", "TB / PTB", "호흡기", "결핵균(Mycobacterium tuberculosis)이 폐에 감염되어 발생하는 만성 감염병.", "pulmon/o(폐) + tubercul/o(결절) + -osis(상태)"],
+      ["Emphysema", "폐기종", "Emp", "호흡기", "말단 세기관지 이하의 폐포벽이 파괴되어 폐포 공간이 비정상적으로 커진 만성 폐질환.", "em-(안) + physema(불어넣기, 팽창)"],
+      ["Pulmonary Fibrosis", "폐섬유증", "PF / IPF", "호흡기", "폐 조직이 만성 염증 등으로 두꺼워지고 딱딱하게 섬유화되어 호흡 기능이 저하되는 질환.", "pulmon/o(폐) + fibr/o(섬유) + -osis(상태)"],
+      ["Upper Respiratory Infection", "상기도 감염(감기)", "URI", "호흡기", "코, 인두, 후두 등 상부 호흡기관에 발생하는 급성 바이러스·세균 감염.", "upper + respiratory + infection"],
+      ["Rhinitis", "비염", "AR", "호흡기", "코안(비강) 점막에 염증이 생겨 코막힘, 재채기, 콧물이 나타나는 질환.", "rhin/o(코) + -itis(염증)"],
+      ["Sinusitis", "부비동염(축농증)", "RS", "호흡기", "코 주위 얼굴뼈 속 빈 공간인 부비동에 염증과 분비물이 차는 질환.", "sinus/o(부비동) + -itis(염증)"],
+      ["Pharyngitis", "인두염", "Phar", "호흡기", "인두 점막에 바이러스나 세균 감염으로 염증과 통증이 발생하는 질환.", "pharyng/o(인두) + -itis(염증)"],
+      ["Laryngitis", "후두염", "Lar", "호흡기", "성대가 위치한 후두에 염증이 생겨 쉰목소리(애성)와 기침이 나타나는 질환.", "laryng/o(후두) + -itis(염증)"],
+      ["Bronchoscopy", "기관지내시경검사", "BFS", "호흡기", "내시경을 기관지 내부로 삽입하여 기도 병변을 관찰하거나 조직검사를 시행하는 시술.", "bronch/o(기관지) + -scopy(내시경검사)"],
+      ["Thoracentesis", "흉강천자", "Thora", "호흡기", "흉막강에 고인 흉수나 공기를 빼내기 위해 가슴벽에 바늘을 찔러 배액하는 시술.", "thorac/o(흉곽) + -centesis(천자)"],
+      ["Tracheostomy", "기관절개술", "Trach", "호흡기", "기도 확보를 위해 목 앞쪽에서 기관에 구멍을 내어 관을 삽입하는 수술.", "trache/o(기관) + -ostomy(개구술)"],
+      ["Endotracheal Intubation", "기관내삽관", "ETI", "호흡기", "입이나 코를 통해 기관 내로 튜브를 삽입하여 기도를 확보하고 인공호흡기를 연결하는 시술.", "endo-(안) + trache/o(기관) + intubation(삽관)"],
+      ["Pulmonary Function Test", "폐기능검사", "PFT", "호흡기", "폐활량, 1초간 강제호기량(FEV1) 등을 측정하여 폐의 환기 및 가스교환 능력을 평가하는 검사.", "pulmon/o(폐) + function + test"],
+
+      // 3) 소화기 (Gastrointestinal) - 40개
+      ["Gastroesophageal Reflux Disease", "위식도 역류질환", "GERD", "소화기", "위산이나 위 내용물이 식도로 역류하여 가슴쓰림과 식도 점막 손상을 일으키는 질환.", "gastr/o(위) + esophag/o(식도) + reflux(역류)"],
+      ["Gastritis", "위염", "AG / CG", "소화기", "위 점막에 급성 또는 만성 염증이 발생한 상태.", "gastr/o(위) + -itis(염증)"],
+      ["Peptic Ulcer Disease", "소화성 궤양", "PUD", "소화기", "위산과 펩신의 공격으로 위나 십이지장 점막이 패여 근육층까지 손상된 질환.", "pept/o(소화) + ulcer(궤양)"],
+      ["Gastroenteritis", "위장염", "AGE", "소화기", "바이러스나 세균 감염 등으로 위와 소장에 염증이 생겨 설사, 구토, 복통을 유발하는 질환.", "gastr/o(위) + enter/o(장) + -itis(염증)"],
+      ["Appendicitis", "충수염(맹장염)", "Appy", "소화기", "우하복부 맹장 끝에 달린 충수돌기에 염증이 발생하는 급성 복통 질환.", "appendic/o(충수) + -itis(염증)"],
+      ["Appendectomy", "충수절제술", "Appe", "소화기", "염증이 생긴 충수돌기를 외과적으로 절제하여 제거하는 수술.", "appendic/o(충수) + -ectomy(절제술)"],
+      ["Hepatitis", "간염", "HAV/HBV/HCV", "소화기", "바이러스, 알코올, 약물, 자가면역 등에 의해 간 조직에 염증이 발생하는 질환.", "hepat/o(간) + -itis(염증)"],
+      ["Liver Cirrhosis", "간경변증(간경화)", "LC", "소화기", "만성 간염 등으로 간세포가 파괴되고 재생결절과 섬유화가 진행되어 간이 딱딱해지는 질환.", "liver + cirrh/o(황갈색) + -osis(상태)"],
+      ["Hepatocellular Carcinoma", "간세포암(간암)", "HCC", "소화기", "간세포에서 기원하는 원발성 악성 종양.", "hepat/o(간) + cellul/o(세포) + carcin/o(암) + -oma(종양)"],
+      ["Hepatomegaly", "간비대", "HM", "소화기", "간염, 지방간, 울혈 등으로 인해 간의 크기가 비정상적으로 커진 상태.", "hepat/o(간) + -megaly(비대)"],
+      ["Cholelithiasis", "담석증", "GB Stone", "소화기", "담낭(쓸개)이나 담관 내부에 콜레스테롤이나 색소 덩어리인 결석(돌)이 생기는 질환.", "chol/e(담즙) + lith/o(결석) + -iasis(병적상태)"],
+      ["Cholecystitis", "담낭염", "AC", "소화기", "담석 등으로 담낭관이 막혀 담낭 벽에 급성 또는 만성 염증이 생기는 질환.", "cholecyst/o(담낭) + -itis(염증)"],
+      ["Cholecystectomy", "담낭절제술", "Lap-chole", "소화기", "염증이나 결석이 있는 담낭을 외과적(주로 복강경)으로 제거하는 수술.", "cholecyst/o(담낭) + -ectomy(절제술)"],
+      ["Cholangitis", "담관염", "Chol", "소화기", "담즙이 이동하는 통로인 담관에 세균 감염과 폐쇄로 인해 발생하는 염증.", "cholangi/o(담관) + -itis(염증)"],
+      ["Pancreatitis", "췌장염", "AP / CP", "소화기", "담석이나 알코올 등으로 인해 췌장 소화효소가 췌장 자체를 자가소화시켜 염증을 일으키는 질환.", "pancreat/o(췌장) + -itis(염증)"],
+      ["Inflammatory Bowel Disease", "염증성 장질환", "IBD", "소화기", "크론병과 궤양성 대장염을 포함하는 위장관의 만성 재발성 염증 질환.", "inflammatory + bowel + disease"],
+      ["Ulcerative Colitis", "궤양성 대장염", "UC", "소화기", "대장 점막과 점막하층에 연속적인 염증과 궤양이 발생하는 만성 염증성 장질환.", "ulcerative(궤양성) + col/o(결장) + -itis(염증)"],
+      ["Crohn Disease", "크론병", "CD", "소화기", "입에서 항문까지 소화관 전체에 걸쳐 비연속적·전층성 염증이 발생할 수 있는 만성 장질환.", "Crohn + disease"],
+      ["Irritable Bowel Syndrome", "과민성 대장 증후군", "IBS", "소화기", "기질적 병변 없이 복통, 복부 팽만감, 설사 또는 변비가 만성적으로 반복되는 기능성 장질환.", "irritable + bowel + syndrome"],
+      ["Ileus", "장폐색(장마비)", "Ileus", "소화기", "장의 연동운동이 마비되거나 기계적으로 막혀 장 내용물이 통과하지 못하는 상태.", "ileus(장폐색)"],
+      ["Diverticulitis", "게실염", "Div", "소화기", "장벽(주로 대장)이 바깥으로 볼록 튀어나온 주머니(게실)에 염증이 발생한 질환.", "diverticul/o(게실) + -itis(염증)"],
+      ["Peritonitis", "복막염", "Peri", "소화기", "장 천공이나 감염 등으로 복강 내 장기를 덮고 있는 복막에 염증이 발생한 응급 질환.", "peritone/o(복막) + -itis(염증)"],
+      ["Ascites", "복수", "Asc", "소화기", "간경변증이나 복막암 등으로 인해 복강 내에 비정상적으로 체액이 고이는 상태.", "ascites(복수)"],
+      ["Dysphagia", "연하곤란(삼킴곤란)", "Dys", "소화기", "음식물이나 액체를 입에서 위로 삼키는 과정에 장애나 통증이 있는 증상.", "dys-(곤란한) + -phagia(삼키기)"],
+      ["Hematemesis", "토혈", "Hem", "소화기", "상부 위장관(식도, 위, 십이지장) 출혈로 인해 피를 토하는 증상.", "hemat/o(혈액) + -emesis(구토)"],
+      ["Melena", "흑색변(혈변)", "Mel", "소화기", "상부 위장관 출혈 시 혈액이 위산과 반응해 검고 끈적한 타르 양상의 변을 보는 증상.", "melan/o(검은색) + -a"],
+      ["Hematochezia", "혈변(선홍색 혈변)", "BRBPR", "소화기", "하부 위장관(대장, 직장, 항문) 출혈로 인해 붉은 피가 섞여 나오는 변.", "hemat/o(혈액) + -chezia(배변)"],
+      ["Jaundice", "황달", "Jau / Icterus", "소화기", "혈중 빌리루빈 농도가 상승하여 피부와 눈의 흰자위(공막)가 노랗게 변하는 증상.", "jaundice(황달)"],
+      ["Esophagogastroduodenoscopy", "상부위장관 내시경검사", "EGD", "소화기", "내시경으로 식도, 위, 십이지장까지 직접 관찰하며 진단·조직검사를 하는 검사.", "esophag/o(식도) + gastr/o(위) + duoden/o(십이지장) + -scopy(내시경)"],
+      ["Colonoscopy", "대장내시경검사", "CFS", "소화기", "항문을 통해 내시경을 삽입하여 직장부터 대장 전체와 말단 회장을 관찰하는 검사.", "colon/o(결장) + -scopy(내시경검사)"],
+      ["Endoscopic Retrograde Cholangiopancreatography", "내시경적 역행성 담췌관조영술", "ERCP", "소화기", "십이지장 내시경을 통해 담관과 췌관에 조영제를 주입해 촬영하고 담석을 제거하는 시술.", "endo-(안)+scopy / retro-(역행) / cholangi/o(담관)+pancreat/o(췌장)+-graphy"],
+      ["Gastrectomy", "위절제술", "STG / TG", "소화기", "위암이나 궤양 치료를 위해 위의 일부 또는 전체를 절제하는 수술.", "gastr/o(위) + -ectomy(절제술)"],
+      ["Colectomy", "결장절제술", "Col", "소화기", "대장(결장)의 일부 또는 전체를 외과적으로 절제하는 수술.", "col/o(결장) + -ectomy(절제술)"],
+      ["Colostomy", "결장루술(인공항문술)", "Colos", "소화기", "결장의 일부를 복벽 바깥으로 꺼내어 대변이 배출될 수 있는 개구부(장루)를 만드는 수술.", "col/o(결장) + -ostomy(개구술)"],
+      ["Laparoscopy", "복강경검사(복강경수술)", "Lap", "소화기", "복부에 작은 구멍을 내고 카메라와 기구를 넣어 복강 내부를 진단·수술하는 방법.", "lapar/o(복부) + -scopy(내시경검사)"],
+      ["Paracentesis", "복수천자", "Para", "소화기", "복강 내에 고인 복수를 바늘이나 카테터로 뽑아내어 진단하거나 압력을 줄이는 시술.", "para-(곁) + -centesis(천자)"],
+      ["Esophageal Varices", "식도정맥류", "EV", "소화기", "간경변증에 의한 문맥압 항진으로 식도 하부 정맥이 부풀어 올라 파열 시 대량 출혈을 유발하는 질환.", "esophag/o(식도) + varices(정맥류)"],
+      ["Stomatitis", "구내염", "Stom", "소화기", "입안(구강) 점막과 혀, 잇몸 등에 염증이나 궤양이 생기는 질환.", "stomat/o(구강) + -itis(염증)"],
+      ["Diarrhea", "설사", "Dia", "소화기", "수분이 많은 묽은 변을 평소보다 자주 배설하는 증상.", "dia-(통하여) + -rrhea(유출, 흐름)"],
+      ["Constipation", "변비", "Con", "소화기", "배변 횟수가 줄어들거나 변이 딱딱해져 배변이 힘든 상태.", "constipat/o(변비) + -ion"],
+
+      // 4) 신경/정신 (Neurology & Psychiatry) - 38개
+      ["Cerebrovascular Accident", "뇌졸중(뇌혈관사고)", "CVA", "신경", "뇌혈관이 막히거나(뇌경색) 터져서(뇌출혈) 급격한 신경학적 결손이 발생하는 응급 질환.", "cerebr/o(대뇌) + vascul/o(혈관) + accident"],
+      ["Cerebral Infarction", "뇌경색(허혈성 뇌졸중)", "CI", "신경", "뇌혈관이 혈전이나 색전으로 막혀 뇌 조직이 허혈성 괴사를 일으키는 질환.", "cerebr/o(대뇌) + infarction(경색)"],
+      ["Intracerebral Hemorrhage", "뇌내출혈", "ICH", "신경", "고혈압이나 혈관 기형 등으로 뇌 실질 내부에 혈관이 파열되어 출혈이 발생한 상태.", "intra-(안) + cerebr/o(대뇌) + hemorrhage(출혈)"],
+      ["Subarachnoid Hemorrhage", "지주막하출혈", "SAH", "신경", "뇌동맥류 파열 등으로 인해 뇌를 감싸는 지주막 아래 공간에 출혈이 발생하는 초응급 질환.", "sub-(아래) + arachnoid(지주막) + hemorrhage(출혈)"],
+      ["Subdural Hematoma", "경막하혈종", "SDH", "신경", "두부 외상 등으로 뇌경막과 지주막 사이에 혈액이 고여 뇌를 압박하는 상태.", "sub-(아래) + dur/o(경막) + hemat/o(혈액) + -oma(종괴)"],
+      ["Epidural Hematoma", "경막외혈종", "EDH", "신경", "두개골과 뇌경막 사이에 동맥 출혈 등으로 혈종이 형성되는 응급 외상 질환.", "epi-(위) + dur/o(경막) + hemat/o(혈액) + -oma(종괴)"],
+      ["Transient Ischemic Attack", "일과성 허혈발작", "TIA", "신경", "뇌혈류가 일시적으로 차단되어 뇌졸중 증상이 나타났다가 24시간 이내에 완전히 회복되는 상태.", "transient(일과성) + ischem/o(허혈) + attack"],
+      ["Increased Intracranial Pressure", "두개내압 상승", "IICP / ICP↑", "신경", "뇌부종, 출혈, 종양 등으로 두개골 내부의 압력이 비정상적으로 높아진 응급 상태.", "intra-(안) + crani/o(두개골) + pressure"],
+      ["Meningitis", "뇌수막염(수막염)", "Men", "신경", "뇌와 척수를 둘러싸고 있는 수막에 세균이나 바이러스 감염으로 염증이 발생하는 질환.", "mening/o(수막) + -itis(염증)"],
+      ["Encephalitis", "뇌염", "Enc", "신경", "바이러스 감염이나 자가면역 반응으로 뇌 실질 조직 자체에 염증이 생기는 질환.", "encephal/o(뇌) + -itis(염증)"],
+      ["Encephalopathy", "뇌병증", "HE / WE", "신경", "간부전(간성뇌증), 대사 이상, 독소 등으로 뇌 전반의 기능이 저하되는 병적 상태.", "encephal/o(뇌) + -pathy(병증)"],
+      ["Epilepsy", "뇌전증(간질)", "Epi", "신경", "뇌 신경세포의 비정상적인 과도한 전기 방전으로 인해 발작이 반복적으로 발생하는 만성 뇌질환.", "epilepsy(발작)"],
+      ["Seizure", "경련(발작)", "Sz", "신경", "뇌의 비정상적인 전기 활동으로 인해 나타나는 일시적인 움직임, 감각, 의식의 변화.", "seizure(발작)"],
+      ["Parkinson Disease", "파킨슨병", "PD", "신경", "중뇌 흑질의 도파민 신경세포 소실로 안정시 떨림, 경직, 운동완만, 자세불안정이 나타나는 퇴행성 뇌질환.", "Parkinson + disease"],
+      ["Alzheimer Disease", "알츠하이머병", "AD", "신경", "베타아밀로이드 침착 등으로 뇌세포가 서서히 퇴행하여 기억력 저하와 치매를 유발하는 가장 흔한 질환.", "Alzheimer + disease"],
+      ["Multiple Sclerosis", "다발성 경화증", "MS", "신경", "중추신경계(뇌, 시신경, 척수)의 수초가 자가면역 반응으로 탈수초화되어 다양한 신경 증상을 일으키는 질환.", "multi-(다발) + -sclerosis(경화증)"],
+      ["Amyotrophic Lateral Sclerosis", "근위축성 측삭경화증(루게릭병)", "ALS", "신경", "운동신경세포만 선택적으로 사멸하여 온몸의 근육이 마르고 마비되는 신경퇴행성 질환.", "a-(없음)+my/o(근육)+troph/o(영양) + lateral + -sclerosis(경화)"],
+      ["Myasthenia Gravis", "중증근무력증", "MG", "신경", "신경근접합부의 아세틸콜린 수용체에 대한 자가항체로 인해 근육 약화와 피로가 나타나는 질환.", "my/o(근육) + asthenia(무력증) + gravis(중증)"],
+      ["Guillain-Barre Syndrome", "길랭-바레 증후군", "GBS", "신경", "감염 후 말초신경에 급성 염증성 탈수초화가 발생하여 하지부터 상행성 마비가 진행되는 질환.", "Guillain-Barre + syndrome"],
+      ["Polyneuropathy", "다발신경병증", "PNP", "신경", "당뇨병이나 독소 등으로 인해 전신의 여러 말초신경이 동시에 손상되어 저림과 감각저하가 오는 질환.", "poly-(많은) + neur/o(신경) + -pathy(병증)"],
+      ["Neuralgia", "신경통", "Neu", "신경", "특정 신경의 주행 경로를 따라 나타나는 심하고 예리한 발작적 통증.", "neur/o(신경) + -algia(통증)"],
+      ["Hemiplegia", "편마비", "Hemi", "신경", "뇌졸중 등으로 인해 신체의 좌측 또는 우측 반쪽이 완전히 마비된 상태.", "hemi-(반) + -plegia(마비)"],
+      ["Paraplegia", "하반신마비(하지마비)", "Para", "신경", "흉추·요추 척수 손상 등으로 인해 양쪽 다리와 하반신이 마비된 상태.", "para-(양측하부) + -plegia(마비)"],
+      ["Quadriplegia", "사지마비", "Quad / Tetra", "신경", "경추(목뼈) 척수 손상 등으로 양팔과 양다리 모두 마비된 상태.", "quadri-(넷) + -plegia(마비)"],
+      ["Aphasia", "실어증", "Aph", "신경", "뇌의 언어 중추 손상으로 인해 말을 이해하거나 표현하는 언어 능력을 상실한 상태.", "a-(없음) + -phasia(말하기)"],
+      ["Dysarthria", "구음장애(발음장애)", "Dys", "신경", "언어 이해는 정상이나 발성·발음 근육의 마비나 협응 장애로 발음이 어눌해지는 증상.", "dys-(곤란한) + arthr/o(조음, 관절) + -ia"],
+      ["Ataxia", "운동실조", "Atx", "신경", "소뇌 기능 장애 등으로 인해 근육 움직임의 조화가 깨져 비틀거리고 균형을 못 잡는 상태.", "a-(없음) + tax/o(질서, 조화) + -ia"],
+      ["Hydrocephalus", "수두증(뇌수종)", "HC", "신경", "뇌실 내에 뇌척수액(CSF)이 비정상적으로 축적되어 뇌실이 확장되고 뇌압이 오르는 질환.", "hydr/o(물) + cephal/o(머리) + -us"],
+      ["Electroencephalogram", "뇌파검사(뇌전도)", "EEG", "신경", "두피에 전극을 부착하여 뇌 신경세포의 전기적 활동 파형을 기록하는 검사.", "electr/o(전기) + encephal/o(뇌) + -gram(기록)"],
+      ["Lumbar Puncture", "요추천자(뇌척수액검사)", "LP", "신경", "요추 사이의 지주막하강에 바늘을 찔러 뇌척수액(CSF)을 채취하거나 뇌압을 측정하는 시술.", "lumb/o(요추) + puncture(천자)"],
+      ["Craniotomy", "개두술", "Cran", "신경", "뇌종양 제거, 뇌출혈 지혈 등을 위해 두개골의 일부를 절개하여 여는 수술.", "crani/o(두개골) + -otomy(절개술)"],
+      ["Craniectomy", "두개골절제술", "DC", "신경", "심한 뇌부종 시 뇌압을 낮추기 위해 두개골의 일부를 절제하여 떼어내는 수술.", "crani/o(두개골) + -ectomy(절제술)"],
+      ["Glasgow Coma Scale", "글래스고 혼수척도", "GCS", "신경", "눈뜨기(E), 언어반응(V), 운동반응(M) 3가지를 점수화(3~15점)하여 환자의 의식 수준을 평가하는 지표.", "Glasgow + coma + scale"],
+      ["Delirium", "섬망", "Del", "신경", "급성 질환이나 수술 후 일시적으로 나타나는 주의력 저하, 지남력 상실, 환각 등의 급성 혼돈 상태.", "delirium(섬망)"],
+      ["Dementia", "치매", "Dem", "신경", "후천적인 다발성 인지기능(기억력, 언어, 판단력) 저하로 일상생활 수행에 지장이 생긴 증후군.", "de-(떨어짐) + ment/o(정신) + -ia"],
+      ["Schizophrenia", "조현병", "SPR", "신경", "망상, 환청, 와해된 언어와 정서적 둔마 등이 나타나는 만성 정신과 질환.", "schiz/o(분열) + phren/o(정신) + -ia"],
+      ["Major Depressive Disorder", "주요우울장애(우울증)", "MDD", "신경", "지속적인 우울감과 흥미 상실, 수면·식욕 변화, 무기력이 나타나는 기분장애.", "major + depressive + disorder"],
+      ["Post-Traumatic Stress Disorder", "외상후 스트레스 장애", "PTSD", "신경", "생명을 위협하는 심각한 트라우마를 겪은 후 재경험, 회피, 과각성이 지속되는 질환.", "post-(이후) + trauma(외상) + stress + disorder"],
+
+      // 5) 근골격 (Musculoskeletal) - 34개
+      ["Osteoarthritis", "골관절염(퇴행성 관절염)", "OA", "근골격", "관절 연골이 점진적으로 마모되고 손상되어 관절 통증과 변형을 일으키는 퇴행성 질환.", "oste/o(뼈) + arthr/o(관절) + -itis(염증)"],
+      ["Rheumatoid Arthritis", "류마티스 관절염", "RA", "근골격", "활막의 만성 자가면역성 염증으로 인해 다발성 대칭성 관절 손상과 변형을 유발하는 질환.", "rheumat/o(류마티스) + arthr/o(관절) + -itis(염증)"],
+      ["Osteoporosis", "골다공증", "OP", "근골격", "골량과 골밀도가 감소하여 뼈에 구멍이 많아지고 약해져 쉽게 골절이 일어나는 질환.", "oste/o(뼈) + por/o(구멍) + -osis(상태)"],
+      ["Osteopenia", "골감소증", "OPN", "근골격", "골밀도가 정상보다 낮아졌으나 아직 골다공증 수준까지는 이르지 않은 전단계 상태.", "oste/o(뼈) + -penia(감소증)"],
+      ["Osteomalacia", "골연화증", "OM", "근골격", "비타민 D나 칼슘 결핍으로 인해 뼈의 석회화가 제대로 되지 않아 뼈가 물러지는 질환.", "oste/o(뼈) + -malacia(연화증)"],
+      ["Osteomyelitis", "골수염", "OM", "근골격", "세균 등이 뼈와 골수에 침투하여 급성 또는 만성 화농성 염증을 일으키는 질환.", "oste/o(뼈) + myel/o(골수) + -itis(염증)"],
+      ["Fracture", "골절", "Fx", "근골격", "외부 충격이나 병적 원인으로 뼈의 연속성이 완전 또는 불완전하게 끊어진 상태.", "fracture(골절)"],
+      ["Herniated Intervertebral Disc", "추간판탈출증(디스크)", "HIVD", "근골격", "척추뼈 사이의 추간판(디스크) 수핵이 빠져나와 신경근을 압박하여 통증을 일으키는 질환.", "herniated + inter-(사이) + vertebr/o(척추) + disc"],
+      ["Spinal Stenosis", "척추관협착증", "SS", "근골격", "척수와 신경이 지나가는 척추관 통로가 좁아져 허리와 다리에 통증 및 신경 증상을 유발하는 질환.", "spin/o(척추) + -stenosis(협착)"],
+      ["Spondylitis", "척추염", "AS", "근골격", "척추 관절에 염증이 발생하는 질환으로 강직성 척추염(Ankylosing Spondylitis) 등이 대표적임.", "spondyl/o(척추) + -itis(염증)"],
+      ["Spondylolisthesis", "척추전방전위증", "SPL", "근골격", "위쪽 척추뼈가 아래쪽 척추뼈보다 앞쪽으로 미끄러져 어긋나 있는 질환.", "spondyl/o(척추) + -listhesis(미끄러짐)"],
+      ["Scoliosis", "척추측만증", "Sco", "근골격", "척추가 정면에서 보았을 때 S자나 C자 형태로 옆으로 휘어지는 변형.", "scoli/o(굽은) + -osis(상태)"],
+      ["Kyphosis", "척추후만증", "Kyp", "근골격", "흉추 부위가 뒤쪽으로 과도하게 굽어 등이 굽어 보이는 상태.", "kyph/o(등굽음) + -osis(상태)"],
+      ["Lordosis", "척추전만증", "Lor", "근골격", "요추 부위가 앞쪽으로 과도하게 휘어 허리가 들어간 상태.", "lord/o(앞으로 굽음) + -osis(상태)"],
+      ["Gout", "통풍", "Gout", "근골격", "혈중 요산 농도가 높아져 관절 내에 요산 결정이 침착되면서 극심한 급성 관절염을 일으키는 대사 질환.", "gout(통풍)"],
+      ["Rhabdomyolysis", "횡문근융해증", "Rhabdo", "근골격", "심한 운동이나 외상, 약물 등으로 골격근(횡문근)이 파괴되어 미오글로빈이 혈액으로 방출되고 급성 신부전을 유발하는 질환.", "rhabd/o(횡문근) + my/o(근육) + -lysis(융해, 파괴)"],
+      ["Sarcopenia", "근감소증", "Sarc", "근골격", "노화나 질환으로 인해 골격근량과 근력, 신체 기능이 점진적으로 감소하는 상태.", "sarc/o(살, 근육) + -penia(감소증)"],
+      ["Myalgia", "근육통", "Mya", "근골격", "근육에 발생하는 통증.", "my/o(근육) + -algia(통증)"],
+      ["Arthralgia", "관절통", "Arth", "근골격", "관절 부위에 나타나는 통증.", "arthr/o(관절) + -algia(통증)"],
+      ["Chondromalacia", "연골연화증", "CMP", "근골격", "관절 연골(주로 슬개골 아래 연골)이 약해지고 물러져 통증을 유발하는 질환.", "chondr/o(연골) + -malacia(연화증)"],
+      ["Arthroscopy", "관절경검사(관절내시경)", "A/S", "근골격", "관절 내부에 초소형 카메라를 삽입하여 연골·인대 손상을 진단하고 치료하는 수술.", "arthr/o(관절) + -scopy(내시경검사)"],
+      ["Arthroplasty", "관절성형술(인공관절치환술)", "TKA / THA", "근골격", "손상된 관절을 복원하거나 인공관절로 대체하여 기능을 회복시키는 수술.", "arthr/o(관절) + -plasty(성형술)"],
+      ["Total Knee Arthroplasty", "슬관절 전치환술(무릎인공관절수술)", "TKA / TKR", "근골격", "심한 퇴행성 관절염 등으로 손상된 무릎 관절 전체를 인공관절로 교체하는 수술.", "total + knee + arthr/o(관절) + -plasty(성형술)"],
+      ["Total Hip Arthroplasty", "고관절 전치환술", "THA / THR", "근골격", "대퇴골두 무혈성 괴사나 골절, 관절염 시 고관절을 인공관절로 교체하는 수술.", "total + hip + arthr/o(관절) + -plasty(성형술)"],
+      ["Open Reduction and Internal Fixation", "개방정복 및 내고정술", "ORIF", "근골격", "골절 부위를 절개하여 뼈를 원래 위치로 맞춘 뒤 금속판이나 나사로 고정하는 수술.", "open reduction + internal fixation"],
+      ["Anterior Cruciate Ligament", "전방십자인대", "ACL", "근골격", "무릎 관절 내부에서 정강이뼈가 앞으로 밀리는 것을 막아주는 핵심 인대.", "anterior + cruciate + ligament"],
+      ["Carpal Tunnel Syndrome", "수근관증후군(손목터널증후군)", "CTS", "근골격", "손목의 수근관 통로가 좁아져 정중신경이 눌리면서 손바닥과 손가락 저림이 나타나는 질환.", "carp/o(손목) + tunnel + syndrome"],
+      ["Fasciitis", "근막염(족저근막염 등)", "PF", "근골격", "근육을 감싸는 막인 근막(특히 발바닥 족저근막)에 미세 손상과 염증이 발생하는 질환.", "fasci/o(근막) + -itis(염증)"],
+      ["Tendinitis", "건염(힘줄염)", "Ten", "근골격", "근육과 뼈를 연결하는 힘줄(건)에 과사용 등으로 염증이 생기는 질환.", "tendin/o(힘줄) + -itis(염증)"],
+      ["Bursitis", "윤활낭염(점액낭염)", "Bur", "근골격", "관절 마찰을 줄여주는 주머니인 윤활낭에 염증이 생겨 붓고 아픈 질환.", "burs/o(윤활낭) + -itis(염증)"],
+      ["Sprain", "염좌(인대 손상)", "Spr", "근골격", "관절이 삐끗하면서 뼈와 뼈를 잇는 인대가 늘어나거나 찢어진 손상.", "sprain(염좌)"],
+      ["Strain", "근긴장(근육/힘줄 손상)", "Str", "근골격", "근육이나 힘줄(건)이 과도하게 늘어나거나 파열된 손상.", "strain(좌상)"],
+      ["Dislocation", "탈구", "D/L", "근골격", "관절을 이루는 뼈가 정상적인 위치에서 완전히 빠져나온 상태.", "dis-(분리) + location(위치)"],
+      ["Electromyography", "근전도검사", "EMG", "근골격", "근육의 전기적 활성도를 측정하여 신경 및 근육 질환을 진단하는 검사.", "electr/o(전기) + my/o(근육) + -graphy(기록술)"],
+
+      // 6) 내분비/대사 (Endocrine & Metabolic) - 32개
+      ["Diabetes Mellitus", "당뇨병", "DM", "내분비", "인슐린 분비 결핍이나 저항성으로 인해 고혈당이 지속되고 대사 장애와 합병증을 일으키는 질환.", "diabetes(다뇨) + mellitus(달콤한, 꿀)"],
+      ["Diabetic Ketoacidosis", "당뇨병성 케톤산증", "DKA", "내분비", "인슐린 절대 부족으로 지방이 분해되면서 케톤체가 과다 생성되어 혈액이 산성화되는 응급 합병증.", "diabetic + ket/o(케톤) + acid/o(산) + -osis(상태)"],
+      ["Hyperglycemia", "고혈당(증)", "BS↑", "내분비", "혈액 속의 포도당 농도가 정상 범위보다 비정상적으로 높은 상태.", "hyper-(높은) + glyc/o(당) + -emia(혈액상태)"],
+      ["Hypoglycemia", "저혈당(증)", "BS↓", "내분비", "혈중 포도당 농도가 정상 이하(보통 70 mg/dL 미만)로 떨어져 식은땀, 떨림, 의식저하가 오는 응급 상태.", "hypo-(낮은) + glyc/o(당) + -emia(혈액상태)"],
+      ["Hyperthyroidism", "갑상선기능항진증", "Hyper-T", "내분비", "갑상선 호르몬이 과다 분비되어 대사가 항진되고 체중감소, 빈맥, 발한이 나타나는 질환.", "hyper-(과도한) + thyr/o(갑상선) + -oid + -ism(상태)"],
+      ["Hypothyroidism", "갑상선기능저하증", "Hypo-T", "내분비", "갑상선 호르몬 분비가 부족하여 대사가 저하되고 피로, 추위불내성, 부종, 체중증가가 나타나는 질환.", "hypo-(부족한) + thyr/o(갑상선) + -oid + -ism(상태)"],
+      ["Graves Disease", "그레이브스병", "GD", "내분비", "자가항체가 갑상선을 자극하여 갑상선기능항진증과 안구돌출 등을 유발하는 가장 흔한 질환.", "Graves + disease"],
+      ["Hashimoto Thyroiditis", "하시모토 갑상선염", "HT", "내분비", "자가면역 반응으로 갑상선 조직이 만성적으로 파괴되어 갑상선기능저하증을 일으키는 질환.", "Hashimoto + thyr/o(갑상선) + -itis(염증)"],
+      ["Thyroidectomy", "갑상선절제술", "TT", "내분비", "갑상선암이나 갑상선종 치료를 위해 갑상선의 일부 또는 전체를 절제하는 수술.", "thyroid/o(갑상선) + -ectomy(절제술)"],
+      ["Goiter", "갑상선종", "Goi", "내분비", "갑상선이 전체적으로 또는 부분적으로 비대해져 목 앞쪽이 부어오른 상태.", "goiter(갑상선종)"],
+      ["Cushing Syndrome", "쿠싱증후군", "CS", "내분비", "당류코르티코이드(코르티솔) 호르몬에 만성적으로 과다 노출되어 중심성 비만, 월상안, 고혈압이 나타나는 질환.", "Cushing + syndrome"],
+      ["Addison Disease", "애디슨병(원발성 부신피질기능저하증)", "AD", "내분비", "부신피질이 파괴되어 코르티솔과 알도스테론 분비가 부족해지는 내분비 질환.", "Addison + disease"],
+      ["Pheochromocytoma", "갈색세포종(크롬친화세포종)", "PCC", "내분비", "부신수질에 발생하는 종양으로 카테콜아민을 과다 분비하여 발작성 고혈압을 유발하는 질환.", "phe/o(어두운) + chrom/o(색) + cyt/o(세포) + -oma(종양)"],
+      ["Acromegaly", "말단비대증", "Acro", "내분비", "성장이 끝난 성인에서 뇌하수체 종양 등으로 성장호르몬이 과다 분비되어 손, 발, 턱 등이 커지는 질환.", "acr/o(말단, 사지끝) + -megaly(비대)"],
+      ["Diabetes Insipidus", "요붕증", "DI", "내분비", "항이뇨호르몬(ADH)의 분비 부족이나 신장 반응 저하로 인해 묽은 소변을 다량으로 배출하고 심한 갈증을 느끼는 질환.", "diabetes(다뇨) + insipidus(무미의, 싱거운)"],
+      ["Syndrome of Inappropriate Antidiuretic Hormone", "항이뇨호르몬 부적절분비 증후군", "SIADH", "내분비", "항이뇨호르몬이 과도하게 분비되어 수분 저류와 희석성 저나트륨혈증을 일으키는 증후군.", "SIADH"],
+      ["Hyperlipidemia", "고지혈증(이상지질혈증)", "HLD / DL", "내분비", "혈액 내에 콜레스테롤이나 중성지방 등 지질 수치가 비정상적으로 높은 상태.", "hyper-(높은) + lipid/o(지질) + -emia(혈액상태)"],
+      ["Hyperkalemia", "고칼륨혈증", "K+↑", "내분비", "혈중 칼륨(K+) 농도가 정상보다 높아져 치명적인 심장 부정맥을 유발할 수 있는 전해질 이상.", "hyper-(높은) + kal/i(칼륨) + -emia(혈액상태)"],
+      ["Hypokalemia", "저칼륨혈증", "K+↓", "내분비", "혈중 칼륨 농도가 정상보다 낮아 근력 약화, 근육 경련, 부정맥이 나타나는 상태.", "hypo-(낮은) + kal/i(칼륨) + -emia(혈액상태)"],
+      ["Hypernatremia", "고나트륨혈증", "Na+↑", "내분비", "수분 결핍 등으로 인해 혈중 나트륨(Na+) 농도가 정상(145 mEq/L)을 초과한 상태.", "hyper-(높은) + natr/i(나트륨) + -emia(혈액상태)"],
+      ["Hyponatremia", "저나트륨혈증", "Na+↓", "내분비", "혈중 나트륨 농도가 135 mEq/L 미만으로 낮아져 뇌부종, 오심, 의식변화를 일으킬 수 있는 상태.", "hypo-(낮은) + natr/i(나트륨) + -emia(혈액상태)"],
+      ["Hypercalcemia", "고칼슘혈증", "Ca2+↑", "내분비", "부갑상선기능항진증이나 악성종양 등으로 혈중 칼슘 농도가 비정상적으로 높은 상태.", "hyper-(높은) + calc/o(칼슘) + -emia(혈액상태)"],
+      ["Hypocalcemia", "저칼슘혈증", "Ca2+↓", "내분비", "혈중 칼슘 농도가 낮아져 신경·근육 흥분성이 증가하고 강직(테타니)이 나타나는 상태.", "hypo-(낮은) + calc/o(칼슘) + -emia(혈액상태)"],
+      ["Polydipsia", "다음증(과다갈증)", "PD", "내분비", "비정상적으로 심한 갈증을 느껴 물을 과도하게 많이 마시는 증상 (당뇨병의 3대 증상 중 하나).", "poly-(많은) + -dipsia(갈증)"],
+      ["Polyphagia", "다식증(과식증)", "PP", "내분비", "비정상적으로 배고픔을 느껴 음식을 많이 섭취하는 증상.", "poly-(많은) + -phagia(먹기)"],
+      ["Metabolic Syndrome", "대사증후군", "MetS", "내분비", "복부비만, 고혈압, 고혈당, 고중성지방혈증, 낮은 HDL 콜레스테롤이 복합적으로 나타나는 상태.", "metabol/o(대사) + syndrome"],
+      ["Glycated Hemoglobin", "당화혈색소", "HbA1c", "내분비", "최근 2~3개월간의 평균 혈당 조절 상태를 반영하는 혈액검사 지표.", "glycated + hem/o(혈액) + globin(단백질)"],
+      ["Oral Glucose Tolerance Test", "경구 당부하 검사", "OGTT", "내분비", "포도당 용액을 마신 후 시간별로 혈당을 측정하여 당뇨병 및 임신성 당뇨를 진단하는 검사.", "oral + glucose + tolerance + test"],
+      ["Parathyroidectomy", "부갑상선절제술", "PTX", "내분비", "부갑상선 종양이나 기능항진증 치료를 위해 부갑상선을 절제하는 수술.", "para-(곁) + thyroid/o(갑상선) + -ectomy(절제술)"],
+      ["Adrenalectomy", "부신절제술", "Adr", "내분비", "부신 종양 등을 치료하기 위해 신장 위에 위치한 부신을 절제하는 수술.", "ad-(향하는)+ren/o(신장) + -ectomy(절제술)"],
+      ["Acidosis", "산증(산혈증)", "Acid", "내분비", "체내에 산이 과다 축적되거나 중탄산염이 소실되어 혈액의 pH가 7.35 미만으로 낮아진 상태.", "acid/o(산) + -osis(상태)"],
+      ["Alkalosis", "알칼리증(염기증)", "Alk", "내분비", "과호흡이나 구토 등으로 체내 산이 소실되거나 염기가 과다해져 혈액 pH가 7.45를 초과한 상태.", "alkal/o(알칼리) + -osis(상태)"],
+
+      // 7) 비뇨생식/산부인과 (Genitourinary & OB/GYN) - 36개
+      ["Acute Kidney Injury", "급성 신손상(급성 신부전)", "AKI / ARF", "비뇨생식", "수시간에서 수일 사이에 신장 기능이 급격히 저하되어 질소 노폐물이 축적되고 소변량이 감소하는 상태.", "acute + kidney + injury"],
+      ["Chronic Kidney Disease", "만성 콩팥병(만성 신부전)", "CKD / CRF", "비뇨생식", "3개월 이상 신장의 구조적 손상이나 사구체여과율(GFR) 감소가 지속되는 비가역적 질환.", "chronic + kidney + disease"],
+      ["End-Stage Renal Disease", "말기 신부전", "ESRD", "비뇨생식", "신장 기능이 정상의 15% 미만으로 감소하여 투석이나 신장이식 없이는 생명 유지가 어려운 단계.", "end-stage + ren/o(신장) + disease"],
+      ["Glomerulonephritis", "사구체신염", "GN", "비뇨생식", "신장에서 혈액을 여과하는 모세혈관 덩어리인 사구체에 면역학적 염증이 발생하는 질환.", "glomerul/o(사구체) + nephr/o(신장) + -itis(염증)"],
+      ["Pyelonephritis", "신우신염", "APN", "비뇨생식", "요로감염 세균이 신우와 신장 실질까지 올라가 고열과 옆구리 통증을 일으키는 상부 요로감염.", "pyel/o(신우) + nephr/o(신장) + -itis(염증)"],
+      ["Nephrolithiasis", "신장결석증(신석증)", "Renal Stone", "비뇨생식", "신장 내부에 광물질 결정이 뭉쳐 결석(돌)이 형성되는 질환.", "nephr/o(신장) + lith/o(결석) + -iasis(상태)"],
+      ["Urolithiasis", "요로결석증", "Stone", "비뇨생식", "신장, 요관, 방광, 요도 등 소변이 내려가는 길(요로)에 결석이 생겨 극심한 옆구리 통증을 유발하는 질환.", "ur/o(요로) + lith/o(결석) + -iasis(상태)"],
+      ["Hydronephrosis", "수신증(물콩팥증)", "HN", "비뇨생식", "요로결석이나 종양으로 요관이 막혀 소변이 내려가지 못하고 신우와 신배가 부풀어 오르는 상태.", "hydr/o(물) + nephr/o(신장) + -osis(상태)"],
+      ["Nephrotic Syndrome", "신증후군", "NS", "비뇨생식", "사구체 투과성 증가로 심한 단백뇨, 저알부민혈증, 전신 부종, 고지혈증이 나타나는 증후군.", "nephr/o(신장) + -tic + syndrome"],
+      ["Urinary Tract Infection", "요로감염", "UTI", "비뇨생식", "신장, 방광, 요도 등 비뇨기계에 세균(주로 대장균)이 침투하여 염증을 일으키는 흔한 감염.", "urin/o(소변) + tract + infection"],
+      ["Cystitis", "방광염", "Cys", "비뇨생식", "요도를 통해 들어온 세균으로 방광 점막에 염증이 생겨 빈뇨, 배뇨통, 잔뇨감을 일으키는 질환.", "cyst/o(방광) + -itis(염증)"],
+      ["Hematuria", "혈뇨", "HU", "비뇨생식", "소변에 비정상적으로 적혈구(피)가 섞여 나오는 증상.", "hemat/o(혈액) + -uria(소변상태)"],
+      ["Proteinuria", "단백뇨", "PU", "비뇨생식", "신장 사구체 손상 등으로 인해 소변으로 단백질이 기준치 이상 배출되는 상태.", "protein(단백질) + -uria(소변상태)"],
+      ["Glycosuria", "당뇨(요당)", "GU", "비뇨생식", "고혈당이나 신세뇨관 이상으로 소변에 포도당이 섞여 배출되는 상태.", "glycos/o(당) + -uria(소변상태)"],
+      ["Dysuria", "배뇨곤란(배뇨통)", "Dys", "비뇨생식", "소변을 볼 때 통증이나 작열감, 불편함을 느끼는 증상.", "dys-(곤란한, 통증성) + -uria(배뇨)"],
+      ["Polyuria", "다뇨(증)", "PU", "비뇨생식", "하루 소변 배출량이 비정상적으로 많은 상태 (성인 기준 약 2.5~3L 이상).", "poly-(많은) + -uria(소변)"],
+      ["Oliguria", "핍뇨", "Olig", "비뇨생식", "소변량이 현저히 감소한 상태 (성인 기준 하루 400mL 미만 또는 시간당 0.5mL/kg 미만).", "olig/o(적은) + -uria(소변)"],
+      ["Anuria", "무뇨(증)", "Anu", "비뇨생식", "소변이 거의 만들어지지 않거나 배출되지 않는 상태 (하루 100mL 미만).", "an-(없음) + -uria(소변)"],
+      ["Uremia", "요독증", "Ure", "비뇨생식", "심한 신부전으로 인해 소변으로 배출되어야 할 요소 등 노폐물이 혈액에 축적되어 나타나는 중독 증상.", "ur/o(소변, 요소) + -emia(혈액상태)"],
+      ["Hemodialysis", "혈액투석", "HD", "비뇨생식", "신부전 환자의 혈액을 체외 인공신장기(투석기)에 통과시켜 노폐물과 수분을 걸러내는 치료.", "hem/o(혈액) + dia-(통하여) + -lysis(분리, 투석)"],
+      ["Peritoneal Dialysis", "복막투석", "PD", "비뇨생식", "복강 내에 투석액을 주입하고 환자 자신의 복막을 여과막으로 이용해 노폐물을 제거하는 투석법.", "peritone/o(복막) + dialysis(투석)"],
+      ["Nephrectomy", "신장절제술(콩팥절제술)", "Neph", "비뇨생식", "신장암이나 심한 신장 손상, 이식 공여를 위해 신장을 외과적으로 제거하는 수술.", "nephr/o(신장) + -ectomy(절제술)"],
+      ["Cystoscopy", "방광경검사(방광내시경)", "Cys", "비뇨생식", "요도를 통해 내시경을 삽입하여 방광 내부의 종양, 결석, 염증을 직접 관찰하는 검사.", "cyst/o(방광) + -scopy(내시경검사)"],
+      ["Benign Prostatic Hyperplasia", "양성 전립선비대증", "BPH", "비뇨생식", "노화로 인해 남성의 전립선이 비대해져 방광 출구와 요도를 압박해 배뇨장애를 일으키는 질환.", "benign(양성) + prostat/o(전립선) + hyper-(과도한)+-plasia(형성)"],
+      ["Transurethral Resection of the Prostate", "경요도 전립선절제술", "TURP", "비뇨생식", "요도를 통해 내시경 절제경을 넣어 비대해진 전립선 조직을 깎아내는 수술.", "trans-(통하여)+urethr/o(요도) + resection + prostate"],
+      ["Extracorporeal Shock Wave Lithotripsy", "체외충격파쇄석술", "ESWL", "비뇨생식", "몸 밖에서 충격파를 쏘아 신장이나 요관의 결석을 잘게 부수어 소변으로 배출시키는 시술.", "extra-(바깥)+corpore/o(신체) + lith/o(결석)+-tripsy(분쇄술)"],
+      ["Endometriosis", "자궁내막증", "EMS", "비뇨생식", "자궁 안에 있어야 할 자궁내막 조직이 난소나 복강 등 자궁 바깥에 존재하며 월경통과 난임을 유발하는 질환.", "endo-(안) + metr/o(자궁) + -iosis(병적상태)"],
+      ["Uterine Myoma", "자궁근종", "Myoma", "비뇨생식", "자궁의 평활근 세포에서 발생하는 여성에서 가장 흔한 양성 종양.", "uter/o(자궁) + my/o(근육) + -oma(종양)"],
+      ["Pelvic Inflammatory Disease", "골반염(골반내 염증성 질환)", "PID", "비뇨생식", "자궁경부에서 자궁내막, 난관, 난소, 골반 복막으로 감염이 파급되어 발생하는 여성 상부 생식기 염증.", "pelv/i(골반) + inflammatory + disease"],
+      ["Polycystic Ovary Syndrome", "다낭성 난소 증후군", "PCOS", "비뇨생식", "배란 장애, 고안드로겐혈증, 초음파상 다낭성 난소 소견을 특징으로 하는 내분비·부인과 질환.", "poly-(많은) + cyst/o(낭종) + ovar/i(난소) + syndrome"],
+      ["Ectopic Pregnancy", "자궁외임신", "EP", "비뇨생식", "수정란이 정상 자궁강 내가 아닌 난관(나팔관) 등에 착상되는 산부인과적 응급 질환.", "ect/o(바깥) + -pic(위치) + pregnancy(임신)"],
+      ["Preeclampsia", "전자간증(임신중독증)", "PE", "비뇨생식", "임신 20주 이후에 새로 발생하는 고혈압과 단백뇨(또는 장기 손상)를 특징으로 하는 임신 합병증.", "pre-(이전) + eclampsia(자간증, 경련)"],
+      ["Cesarean Section", "제왕절개술", "C/S / C-sec", "비뇨생식", "산모의 복벽과 자궁을 절개하여 태아를 분만하는 수술.", "Cesarean + section(절개)"],
+      ["Hysterectomy", "자궁절제술(자궁적출술)", "TAH / LAVH", "비뇨생식", "자궁근종, 자궁선근증, 부인과 암 등의 치료를 위해 자궁을 제거하는 수술.", "hyster/o(자궁) + -ectomy(절제술)"],
+      ["Oophorectomy", "난소절제술", "Ooph", "비뇨생식", "난소 종양이나 질환 치료를 위해 한쪽 또는 양쪽 난소를 절제하는 수술.", "oophor/o(난소) + -ectomy(절제술)"],
+      ["Salpingectomy", "난관절제술(나팔관절제술)", "Salp", "비뇨생식", "자궁외임신이나 난관 질환 시 난관을 절제하는 수술.", "salping/o(난관) + -ectomy(절제술)"],
+
+      // 8) 혈액/종양 (Hematology & Oncology) - 34개
+      ["Anemia", "빈혈", "Hb↓", "혈액/종양", "혈액 내 적혈구 수나 혈색소(헤모글로빈) 농도가 정상보다 감소하여 산소 운반 능력이 저하된 상태.", "an-(없음) + -emia(혈액상태)"],
+      ["Iron Deficiency Anemia", "철결핍성 빈혈", "IDA", "혈액/종양", "체내 저장철 부족으로 헤모글로빈 합성이 저하되어 발생하는 가장 흔한 빈혈.", "iron + deficiency + an-(없음)+-emia(혈액)"],
+      ["Aplastic Anemia", "재생불량성 빈혈", "AA", "혈액/종양", "골수의 조혈모세포가 손상되어 적혈구, 백혈구, 혈소판 모두 생산되지 못하는 중증 혈액 질환.", "a-(없음) + plast/o(형성) + an-(없음)+-emia"],
+      ["Hemolytic Anemia", "용혈성 빈혈", "HA", "혈액/종양", "적혈구가 정상 수명(약 120일)을 채우지 못하고 조기에 파괴(용혈)되어 발생하는 빈혈.", "hem/o(혈액) + -lytic(파괴, 용해) + anemia"],
+      ["Leukemia", "백혈병", "ALL/AML/CML", "혈액/종양", "골수에서 비정상적인 미성숙 백혈구(암세포)가 끝없이 증식하여 정상 조혈 기능을 억제하는 혈액암.", "leuk/o(백혈구) + -emia(혈액상태)"],
+      ["Lymphoma", "림프종", "HL / NHL", "혈액/종양", "면역계를 구성하는 림프구에서 기원하여 림프절과 장기에 종괴를 형성하는 악성 혈액종양.", "lymph/o(림프) + -oma(종양)"],
+      ["Multiple Myeloma", "다발성 골수종", "MM", "혈액/종양", "골수에서 항체를 만드는 형질세포가 악성 증식하여 뼈 용해 병변, 신부전, 빈혈을 일으키는 혈액암.", "multi-(다발) + myel/o(골수) + -oma(종양)"],
+      ["Leukocytosis", "백혈구증가증", "WBC↑", "혈액/종양", "감염이나 염증 반응 등으로 혈중 백혈구 수치가 정상 범위 이상으로 증가한 상태.", "leuk/o(백혈구) + cyt/o(세포) + -osis(증가상태)"],
+      ["Leukopenia", "백혈구감소증", "WBC↓", "혈액/종양", "항암치료나 바이러스 감염 등으로 혈중 백혈구 수가 정상 이하로 감소하여 감염 위험이 높아진 상태.", "leuk/o(백혈구) + -penia(감소증)"],
+      ["Neutropenia", "호중구감소증", "ANC↓", "혈액/종양", "세균 방어에 핵심적인 백혈구인 호중구(ANC) 수치가 감소하여 중증 감염에 취약해진 상태.", "neutr/o(호중구) + -penia(감소증)"],
+      ["Thrombocytopenia", "혈소판감소증", "PLT↓", "혈액/종양", "지혈 작용을 하는 혈소판 수치가 감소하여 점상출혈, 멍, 출혈 경향이 나타나는 상태.", "thromb/o(혈전, 혈소판) + cyt/o(세포) + -penia(감소증)"],
+      ["Pancytopenia", "범혈구감소증", "Pan", "혈액/종양", "적혈구, 백혈구, 혈소판 세 가지 혈구 세포가 모두 동시에 감소한 상태.", "pan-(전체) + cyt/o(세포) + -penia(감소증)"],
+      ["Disseminated Intravascular Coagulation", "파종성 혈관내응고", "DIC", "혈액/종양", "패혈증이나 중증 외상 시 전신 미세혈관에 혈전이 생기고 응고인자가 고갈되어 대량 출혈이 동반되는 응급 상태.", "disseminated + intra-(안)+vascul/o(혈관) + coagulation"],
+      ["Hemophilia", "혈우병", "Hem", "혈액/종양", "선천적으로 혈액응고인자(제8인자 또는 제9인자)가 결핍되어 지혈이 잘 되지 않는 유전성 출혈 질환.", "hem/o(혈액) + -philia(친화, 경향)"],
+      ["Hemolysis", "용혈", "Hemo", "혈액/종양", "적혈구 세포막이 파괴되어 내부의 헤모글로빈이 혈장 밖으로 빠져나오는 현상.", "hem/o(혈액) + -lysis(파괴, 용해)"],
+      ["Hemostasis", "지혈", "Hemo", "혈액/종양", "혈관 손상 시 혈소판 응집과 혈액 응고 과정을 통해 출혈을 멈추게 하는 작용.", "hem/o(혈액) + -stasis(멈춤, 정지)"],
+      ["Hematopoiesis", "조혈(혈구생성)", "Hema", "혈액/종양", "골수 내 조혈모세포에서 적혈구, 백혈구, 혈소판 등 혈액 세포가 만들어지는 과정.", "hemat/o(혈액) + -poiesis(형성, 생성)"],
+      ["Erythrocyte", "적혈구", "RBC", "혈액/종양", "헤모글로빈을 포함하여 폐에서 조직으로 산소를 운반하는 붉은 혈액 세포.", "erythr/o(붉은) + -cyte(세포)"],
+      ["Leukocyte", "백혈구", "WBC", "혈액/종양", "외부 병원체(세균, 바이러스)로부터 신체를 방어하는 면역 세포.", "leuk/o(흰색) + -cyte(세포)"],
+      ["Thrombocyte", "혈소판", "PLT", "혈액/종양", "혈관 손상 부위에 달라붙어 일차 지혈과 혈액 응고를 돕는 세포 조각.", "thromb/o(응고) + -cyte(세포)"],
+      ["Hemoglobin", "혈색소(헤모글로빈)", "Hb / Hgb", "혈액/종양", "적혈구 내에 존재하는 철 함유 산소 운반 단백질.", "hem/o(혈액, 헴) + globin(글로빈 단백질)"],
+      ["Hematoma", "혈종", "Hema", "혈액/종양", "혈관이 터져 나온 혈액이 조직이나 장기 내부의 한곳에 덩어리로 고여 있는 상태.", "hemat/o(혈액) + -oma(종괴, 덩어리)"],
+      ["Hemorrhage", "출혈", "Bleed", "혈액/종양", "혈관 손상으로 혈액이 혈관 밖으로 급격히 빠져나오는 현상.", "hem/o(혈액) + -rrhage(터져나옴, 과다출혈)"],
+      ["Neoplasm", "신생물(종양)", "Neo", "혈액/종양", "세포가 정상적인 조절을 벗어나 비정상적으로 증식하여 만든 새로운 조직 덩어리.", "neo-(새로운) + -plasm(형성물, 조직)"],
+      ["Carcinoma", "암종(상피성 악성종양)", "CA", "혈액/종양", "피부나 장기 점막의 상피세포에서 기원하는 가장 흔한 형태의 악성 종양(암).", "carcin/o(암) + -oma(종양)"],
+      ["Adenocarcinoma", "선암(샘암종)", "ADC", "혈액/종양", "위, 대장, 폐, 유방, 전립선 등의 분비샘(선) 상피세포에서 발생하는 악성 종양.", "aden/o(샘, 선) + carcin/o(암) + -oma(종양)"],
+      ["Sarcoma", "육종(비상피성 악성종양)", "Sarc", "혈액/종양", "뼈, 연골, 근육, 지방, 혈관 등 간엽(결합) 조직에서 기원하는 악성 종양.", "sarc/o(살, 결합조직) + -oma(종양)"],
+      ["Adenoma", "선종(샘종)", "Ade", "혈액/종양", "샘(선) 상피조직에서 유래한 양성 종양 (대장 용종 등 일부는 선암으로 진행 가능).", "aden/o(샘, 선) + -oma(종양)"],
+      ["Lipoma", "지방종", "Lip", "혈액/종양", "성숙한 지방세포로 구성된 피하조직의 흔한 양성 종양.", "lip/o(지방) + -oma(종양)"],
+      ["Metastasis", "전이", "Meta / Mets", "혈액/종양", "원발 부위의 악성 암세포가 혈관이나 림프관을 타고 다른 장기로 이동해 새로운 종양을 형성하는 현상.", "meta-(이동, 변화) + -stasis(위치)"],
+      ["Biopsy", "생검(조직검사)", "Bx", "혈액/종양", "살아있는 환자의 병변에서 세포나 조직을 채취하여 현미경으로 암이나 질병을 확진하는 검사.", "bi/o(생명) + -opsy(관찰, 검사)"],
+      ["Chemotherapy", "항암화학요법", "Chemo / CTx", "혈액/종양", "세포독성 항암제나 표적치료제 등 약물을 투여하여 암세포를 사멸시키는 치료법.", "chem/o(화학약물) + therapy(치료)"],
+      ["Radiotherapy", "방사선치료", "RT / RTx", "혈액/종양", "고에너지 방사선을 종양 부위에 조사하여 암세포의 DNA를 파괴하고 증식을 억제하는 치료법.", "radi/o(방사선) + therapy(치료)"],
+      ["Splenomegaly", "비장비대(지라비대)", "SM", "혈액/종양", "혈액 질환, 간경변증, 감염 등으로 인해 비장의 크기가 비정상적으로 커진 상태.", "splen/o(비장) + -megaly(비대)"],
+
+      // 9) 감염/면역/피부 (Infectious, Immune & Dermatology) - 33개
+      ["Sepsis", "패혈증", "Sep", "감염/면역", "미생물 감염에 대한 숙주의 조절되지 않는 염증 반응으로 인해 생명을 위협하는 장기 기능 부전이 발생한 상태.", "seps/o(부패, 감염) + -is"],
+      ["Septic Shock", "패혈성 쇼크", "SS", "감염/면역", "패혈증 환자에서 수액 소생술에도 불구하고 지속적인 저혈압과 조직 저관류(젖산 상승)가 동반된 위중한 상태.", "septic(패혈성) + shock(쇼크)"],
+      ["Anaphylaxis", "아나필락시스(과민성 쇼크)", "Ana", "감염/면역", "약물, 음식, 벌독 등 알레르기 원인 물질에 노출된 후 급격히 발생하는 전신적 중증 알레르기 반응.", "ana-(과도, 다시) + -phylaxis(방어)"],
+      ["Systemic Lupus Erythematosus", "전신 홍반 루푸스", "SLE", "감염/면역", "자가항체와 면역복합체가 피부, 관절, 신장, 혈구 등 전신 장기를 공격하는 만성 자가면역 질환.", "systemic + lupus + erythemat/o(홍반)"],
+      ["Acquired Immunodeficiency Syndrome", "후천성 면역결핍 증후군(에이즈)", "AIDS", "감염/면역", "인체면역결핍바이러스(HIV) 감염으로 CD4+ T림프구가 파괴되어 기회감염과 종양이 발생하는 질환.", "acquired + immun/o(면역) + deficiency + syndrome"],
+      ["Systemic Inflammatory Response Syndrome", "전신 염증반응 증후군", "SIRS", "감염/면역", "감염, 외상, 화상, 췌장염 등으로 인해 발열/저체온, 빈맥, 빈호흡, 백혈구 이상이 전신적으로 나타나는 상태.", "systemic + inflammatory + response + syndrome"],
+      ["Cellulitis", "봉와직염(연조직염)", "Cell", "감염/면역", "진피와 피하 조직에 세균(주로 사슬알균, 포도알균)이 침투하여 홍반, 열감, 부종, 통증을 일으키는 급성 세균 감염.", "cellul/o(세포, 소조직) + -itis(염증)"],
+      ["Dermatitis", "피부염", "Derm / AD", "감염/면역", "아토피 피부염, 접촉성 피부염 등 피부에 가려움증, 홍반, 진물, 인설을 동반하는 모든 염증성 피부 질환.", "dermat/o(피부) + -itis(염증)"],
+      ["Herpes Zoster", "대상포진", "HZ", "감염/면역", "수두-대상포진 바이러스가 신경절에 잠복해 있다가 면역력 저하 시 신경절을 따라 띠 모양의 수포와 신경통을 일으키는 질환.", "herpes + zoster(띠)"],
+      ["Urticaria", "두드러기", "Urti", "감염/면역", "피부 혈관의 투과성이 증가하여 일시적으로 피부가 붉거나 흰색으로 부풀어 오르고 심하게 가려운 증상.", "urticaria(두드러기)"],
+      ["Psoriasis", "건선", "Pso", "감염/면역", "은백색의 비늘(인설)로 덮인 붉은 구진과 판이 주로 팔꿈치, 무릎, 두피에 나타나는 만성 면역매개 피부 질환.", "psor/o(가려움) + -iasis(상태)"],
+      ["Erythema", "홍반", "Ery", "감염/면역", "피부 모세혈관의 확장과 충혈로 인해 피부가 붉게 변하는 증상.", "erythem/o(붉음) + -a"],
+      ["Pruritus", "소양증(가려움증)", "Pru", "감염/면역", "피부를 긁거나 문지르고 싶은 충동을 일으키는 불쾌한 감각.", "prurit/o(가려움) + -us"],
+      ["Alopecia", "탈모(증)", "Alo", "감염/면역", "정상적으로 모발이 존재해야 할 부위에 모발이 빠지거나 결여된 상태.", "alopecia(탈모)"],
+      ["Abscess", "농양(고름집)", "Abs", "감염/면역", "조직 내부에 세균 감염으로 백혈구와 죽은 세포가 섞인 고름(농)이 국소적으로 고여 있는 주머니.", "abscess(농양)"],
+      ["Necrotizing Fasciitis", "괴사성 근막염", "NF", "감염/면역", "피하조직과 근막을 따라 세균 감염이 급속히 퍼지면서 조직 괴사와 독성 쇼크를 일으키는 초응급 감염 질환.", "necr/o(괴사) + fasci/o(근막) + -itis(염증)"],
+      ["Pressure Injury", "욕창(압박궤양)", "PI / PU", "감염/면역", "오랜 시간 한 자세로 누워 있을 때 뼈 돌출부 피부가 지속적인 압박을 받아 허혈과 괴사가 일어나는 손상.", "pressure + injury / decubitus ulcer"],
+      ["Lymphedema", "림프부종", "LE", "감염/면역", "림프관 손상이나 림프절 절제 후 림프액 순환이 막혀 팔이나 다리 조직에 단백질이 풍부한 체액이 고여 붓는 상태.", "lymph/o(림프) + -edema(부종)"],
+      ["Lymphadenopathy", "림프절병증(림프절비대)", "LAP", "감염/면역", "감염, 자가면역질환, 악성종양 등으로 인해 림프절의 크기가 커지거나 성상이 변한 상태.", "lymph/o(림프) + aden/o(샘, 절) + -pathy(병증)"],
+      ["Lymphadenitis", "림프절염", "LA", "감염/면역", "세균이나 바이러스 감염으로 인해 림프절에 염증과 압통이 발생한 상태.", "lymph/o(림프) + aden/o(샘) + -itis(염증)"],
+      ["Methicillin-Resistant Staphylococcus Aureus", "메티실린 내성 황색포도알균", "MRSA", "감염/면역", "페니실린 및 세팔로스포린계 항생제에 내성을 획득한 주요 병원내 감염 원인균.", "MRSA"],
+      ["Vancomycin-Resistant Enterococci", "반코마이신 내성 장알균", "VRE", "감염/면역", "반코마이신 항생제에 내성을 가진 장알균으로 접촉주의 격리가 필요한 다제내성균.", "VRE"],
+      ["Carbapenem-Resistant Enterobacteriaceae", "카바페넴 내성 장내세균속균종", "CRE", "감염/면역", "카바페넴 계열 항생제에 내성을 나타내며 전파력이 강해 법정감염병으로 관리되는 슈퍼박테리아.", "CRE"],
+      ["Autoimmune Disease", "자가면역질환", "AID", "감염/면역", "면역체계가 외부 침입자가 아닌 자기 자신의 정상 세포와 조직을 공격하여 염증을 일으키는 질환군.", "auto-(자가) + immune(면역) + disease"],
+      ["C-Reactive Protein", "C-반응성 단백", "CRP", "감염/면역", "체내에 급성 염증이나 조직 손상이 있을 때 간에서 생성되어 혈중 수치가 급격히 상승하는 염증 표지자.", "C-reactive + protein"],
+      ["Erythrocyte Sedimentation Rate", "적혈구 침강속도", "ESR", "감염/면역", "항응고 처리된 혈액에서 적혈구가 가라앉는 속도로 만성 염증이나 자가면역 질환 활성도를 보는 검사.", "erythr/o(적혈구) + sedimentation + rate"],
+      ["Incision and Drainage", "절개 및 배농술", "I&D", "감염/면역", "농양(고름집)이 생긴 부위를 메스로 절개하여 내부의 고름을 밖으로 배출시키는 처치.", "incision(절개) + drainage(배농)"],
+      ["Debridement", "변연절제술(죽은조직제거술)", "Deb", "감염/면역", "상처나 화상, 욕창 부위의 괴사된 조직과 이물질을 제거하여 정상 조직의 치유를 돕는 시술.", "debridement(변연절제)"],
+      ["Skin Graft", "피부이식술", "STSG / FTSG", "감염/면역", "화상이나 넓은 피부 결손 부위에 다른 부위의 건강한 피부를 떼어내어 옮겨 심는 수술.", "skin + graft(이식)"],
+      ["Melanoma", "악성 흑색종", "MM", "감염/면역", "멜라닌 색소를 만드는 멜라닌세포의 악성화로 발생하는 전이율이 높은 피부암.", "melan/o(검은색, 멜라닌) + -oma(종양)"],
+      ["Basal Cell Carcinoma", "기저세포암", "BCC", "감염/면역", "자외선 노출 부위 표피의 기저층 세포에서 발생하는 가장 흔한 피부 악성 종양.", "basal cell + carcin/o(암) + -oma(종양)"],
+      ["Otitis Media", "중이염", "OM / AOM", "감염/면역", "고막 안쪽의 중이 공간에 바이러스나 세균 감염으로 염증과 삼출액이 차는 질환.", "ot/o(귀) + -itis(염증) + media(중간)"],
+      ["Conjunctivitis", "결막염", "Conj", "감염/면역", "눈꺼풀 안쪽과 흰자위를 덮는 결막에 감염이나 알레르기로 충혈과 눈곱이 생기는 염증.", "conjunctiv/o(결막) + -itis(염증)"],
+
+      // 10) 외과/응급/검사/약리 (Surgery, Emergency, Diagnostics & Clinical) - 40개
+      ["Computed Tomography", "컴퓨터 단층촬영", "CT", "외과/응급/기타", "회전하는 X선과 컴퓨터 재구성을 이용해 인체 내부의 횡단면 영상을 정밀하게 얻는 영상 검사.", "computed + tom/o(단면, 자르기) + -graphy(촬영술)"],
+      ["Magnetic Resonance Imaging", "자기공명영상", "MRI", "외과/응급/기타", "강한 자기장과 고주파를 이용해 뇌, 척수, 근육, 인대 등 연부조직을 고해상도로 촬영하는 검사.", "magnetic + resonance + imaging"],
+      ["Positron Emission Tomography", "양전자 방출 단층촬영", "PET-CT", "외과/응급/기타", "방사성 포도당 유사체(FDG)를 주입하여 암세포의 대사 활성도와 전이 여부를 전신에서 찾아내는 검사.", "positron + emission + tom/o(단면) + -graphy"],
+      ["Ultrasonography", "초음파검사", "US / Sono", "외과/응급/기타", "인체에 무해한 고주파 음파의 반사를 이용해 복부 장기, 심장, 혈관, 태아를 실시간 영상화하는 검사.", "ultra-(초월) + son/o(음파) + -graphy(촬영술)"],
+      ["Complete Blood Count", "일반혈액검사(전혈구계산)", "CBC", "외과/응급/기타", "백혈구(WBC), 적혈구(RBC), 혈색소(Hb), 혈소판(PLT) 수치를 측정하는 가장 기본적인 혈액검사.", "complete + blood + count"],
+      ["Arterial Blood Gas Analysis", "동맥혈 가스분석", "ABGA", "외과/응급/기타", "동맥혈을 채취하여 산소분압(PaO2), 이산화탄소분압(PaCO2), 산도(pH), 중탄산염(HCO3-)을 측정하는 검사.", "arteri/o(동맥) + blood + gas + analysis"],
+      ["Blood Urea Nitrogen", "혈중 요소질소", "BUN", "외과/응급/기타", "단백질 대사 산물인 요소의 혈중 농도로 크레아티닌(Cr)과 함께 신장 기능과 탈수 상태를 평가하는 지표.", "blood + urea + nitrogen"],
+      ["Aspartate Aminotransferase", "아스파르테이트 아미노전이효소", "AST (GOT)", "외과/응급/기타", "간세포 및 심근에 존재하는 효소로 간세포 손상 시 혈중으로 방출되어 수치가 상승하는 간기능 지표.", "AST / GOT"],
+      ["Alanine Aminotransferase", "알라닌 아미노전이효소", "ALT (GPT)", "외과/응급/기타", "주로 간세포 내에 존재하는 효소로 급·만성 간염 등 간 손상을 가장 특이적으로 반영하는 지표.", "ALT / GPT"],
+      ["Intensive Care Unit", "중환자실(집중치료실)", "ICU", "외과/응급/기타", "생명이 위독한 중증 환자를 24시간 집중 감시하고 생명유지장치를 적용하여 치료하는 특수 병동.", "intensive + care + unit"],
+      ["Emergency Department", "응급실", "ED / ER", "외과/응급/기타", "급성 질환이나 외상 환자에게 즉각적인 응급 진단과 소생 처치를 제공하는 진료 부서.", "emergency + department / room"],
+      ["Operating Room", "수술실", "OR", "외과/응급/기타", "무균 환경에서 외과적 수술이 시행되는 시설.", "operating + room"],
+      ["Nothing Per Oral", "금식(경구 섭취 금지)", "NPO", "외과/응급/기타", "수술, 내시경 검사 전이나 장폐색·급성 췌장염 치료를 위해 입으로 물과 음식을 일체 먹지 않는 처방.", "nil / nothing + per(통하여) + os/oral(입)"],
+      ["Intravenous", "정맥내(주사)", "IV", "외과/응급/기타", "정맥 혈관 내부로 직접 수액이나 약물을 투여하는 경로.", "intra-(안) + ven/o(정맥) + -ous(의)"],
+      ["Intramuscular", "근육내(주사)", "IM", "외과/응급/기타", "둔근이나 삼각근 등 근육 조직 내부에 약물을 주사하는 경로.", "intra-(안) + muscul/o(근육) + -ar"],
+      ["Subcutaneous", "피하(주사)", "SC / SQ", "외과/응급/기타", "진피 아래의 피하 지방층에 인슐린이나 헤파린 등을 주사하는 경로.", "sub-(아래) + cutane/o(피부) + -ous"],
+      ["Intradermal", "피내(주사)", "ID", "외과/응급/기타", "항생제 피부반응검사(AST)나 결핵 반응 검사를 위해 표피 바로 아래 진피층에 소량 주사하는 경로.", "intra-(안) + derm/o(피부) + -al"],
+      ["Per Os", "경구 투여(입으로 복용)", "PO", "외과/응급/기타", "약물을 입을 통해 삼켜서 복용하는 투여 경로.", "per(통하여) + os(입)"],
+      ["Pro Re Nata", "필요시 투여(증상 있을 때)", "PRN", "외과/응급/기타", "정해진 시간이 아니라 통증, 발열, 구토 등 특정 증상이 나타날 때마다 필요에 따라 투여하는 처방.", "pro re nata(필요에 따라)"],
+      ["Extracorporeal Membrane Oxygenation", "체외막산소공급(에크모)", "ECMO", "외과/응급/기타", "중증 심부전이나 호흡부전 환자의 혈액을 체외로 빼내어 산소를 공급한 뒤 다시 체내로 넣어주는 생명유지장치.", "extra-(체외)+corpore/o(신체) + membrane + oxygenation"],
+      ["Continuous Renal Replacement Therapy", "지속적 신대체요법", "CRRT", "외과/응급/기타", "혈역학적으로 불안정한 중환자에서 24시간 내내 천천히 혈액을 걸러 수분과 노폐물을 제거하는 지속 투석 치료.", "continuous + ren/o(신장) + replacement + therapy"],
+      ["Mechanical Ventilation", "기계환기(인공호흡기 치료)", "MV / Vent", "외과/응급/기타", "자발 호흡이 불충분한 환자에게 인공호흡기를 연결하여 산소화와 환기를 보조하는 치료.", "mechanical + ventilation"],
+      ["Central Venous Catheter", "중심정맥관", "CVC / C-line", "외과/응급/기타", "쇄골하정맥이나 내경정맥을 통해 상대정맥까지 삽입하여 승압제 투여, 대량 수액 공급, 중심정맥압 측정을 하는 관.", "central + ven/o(정맥) + catheter"],
+      ["Nasogastric Tube", "비위관(콧줄)", "NG Tube / L-tube", "외과/응급/기타", "코를 통해 식도를 거쳐 위까지 삽입하여 위 내용물을 배액하거나 경관영양을 공급하는 관.", "nas/o(코) + gastr/o(위) + tube"],
+      ["Foley Catheter", "유치도뇨관(폴리 카테터)", "Foley", "외과/응급/기타", "요도를 통해 방광에 삽입한 뒤 풍선을 부풀려 고정하여 지속적으로 소변을 배출하고 소변량을 측정하는 관.", "Foley + catheter"],
+      ["Vital Signs", "활력징후(생체징후)", "V/S", "외과/응급/기타", "환자의 생명 유지 상태를 나타내는 4대 기본 지표인 혈압(BP), 맥박(PR), 호흡수(RR), 체온(BT).", "vital(생명의) + signs(징후)"],
+      ["Do Not Resuscitate", "심폐소생술 금지(연명의료 유보)", "DNR", "외과/응급/기타", "회생 가능성이 없는 임종기 환자에서 심정지 발생 시 심폐소생술을 시행하지 않기로 한 사전 결정.", "do not resuscitate"],
+      ["Return of Spontaneous Circulation", "자발순환회복", "ROSC", "외과/응급/기타", "심정지 환자에게 심폐소생술을 시행한 후 환자 스스로 심장 박동과 맥박, 혈압이 다시 돌아온 상태.", "return of spontaneous circulation"],
+      ["Multiple Organ Dysfunction Syndrome", "다발성 장기부전 증후군", "MODS", "외과/응급/기타", "패혈증이나 중증 쇼크 등으로 폐, 신장, 간, 심장 등 2개 이상의 주요 장기가 동시에 기능을 잃는 위독한 상태.", "multi-(다발) + organ + dys-(기능장애) + syndrome"],
+      ["Hypovolemic Shock", "저혈량성 쇼크", "Shock", "외과/응급/기타", "대량 출혈이나 심한 탈수로 인해 혈관 내 혈액량이 급격히 줄어들어 조직 관류가 무너지는 쇼크.", "hypo-(낮은) + vol/o(부피, 혈량) + -emic + shock"],
+      ["Cardiogenic Shock", "심인성 쇼크", "CS", "외과/응급/기타", "급성 심근경색 등으로 심장의 펌프 기능이 심각하게 손상되어 심박출량이 급감하고 저혈압이 발생하는 쇼크.", "cardi/o(심장) + -genic(기원의) + shock"],
+      ["Laparotomy", "개복술", "Lap", "외과/응급/기타", "복강 내 장기의 질환이나 외상 수술을 위해 복벽을 절개하여 여는 수술.", "lapar/o(복벽, 복부) + -otomy(절개술)"],
+      ["Thoracotomy", "개흉술", "Thora", "외과/응급/기타", "폐나 심장, 식도 수술을 위해 가슴벽(흉벽)을 절개하여 여는 수술.", "thorac/o(흉곽) + -otomy(절개술)"],
+      ["Anesthesia", "마취(무감각)", "GA / SA", "외과/응급/기타", "수술이나 시술 시 통증과 감각(전신마취의 경우 의식까지)을 일시적으로 차단하는 처치.", "an-(없음) + -esthesia(감각)"],
+      ["Analgesic", "진통제", "NSAIDs", "외과/응급/기타", "의식을 잃게 하지 않으면서 통증을 완화하거나 없애주는 약물.", "an-(없음) + alges/o(통증) + -ic"],
+      ["Antipyretic", "해열제", "AAP", "외과/응급/기타", "비정상적으로 높아진 체온(발열)을 정상 수준으로 낮추어 주는 약물.", "anti-(대항) + pyret/o(열) + -ic"],
+      ["Antibiotic", "항생제", "Abx", "외과/응급/기타", "세균의 증식을 억제하거나 사멸시켜 세균 감염증을 치료하는 약물.", "anti-(대항) + bi/o(생명, 미생물) + -tic"],
+      ["Anticoagulant", "항응고제", "AC", "외과/응급/기타", "혈액 응고 기전을 억제하여 혈전(피떡)이 생성되거나 커지는 것을 예방·치료하는 약물.", "anti-(반대) + coagul/o(응고) + -ant"],
+      ["Iatrogenic", "의원성(치료유발성)", "Iat", "외과/응급/기타", "의료진의 진단, 시술, 수술, 약물 투여 과정의 부작용이나 합병증으로 인해 발생한 상태.", "iatr/o(의사, 치료) + -genic(유발된)"],
+      ["Idiopathic", "특발성(원인불명)", "Idio", "외과/응급/기타", "정밀 검사에도 불구하고 질병이 발생한 명확한 원인을 알 수 없고 자연 발생한 상태.", "idi/o(고유한, 알수없는) + path/o(질병) + -ic"]
+    ];
+
+    // 객체 배열로 변환 및 초성 생성
+    const CHOSUNG_LIST = ["ㄱ","ㄲ","ㄴ","ㄷ","ㄸ","ㄹ","ㅁ","ㅂ","ㅃ","ㅅ","ㅆ","ㅇ","ㅈ","ㅉ","ㅊ","ㅋ","ㅌ","ㅍ","ㅎ"];
+    function getChosung(str) {
+      let result = "";
+      for (let i = 0; i < str.length; i++) {
+        const code = str.charCodeAt(i) - 44032;
+        if (code > -1 && code < 11172) {
+          result += CHOSUNG_LIST[Math.floor(code / 588)];
+        } else {
+          result += str.charAt(i);
+        }
+      }
+      return result;
+    }
+
+    const MEDICAL_TERMS = RAW_TERMS.map((item, idx) => ({
+      id: idx + 1,
+      en: item[0],
+      ko: item[1],
+      abbr: item[2],
+      category: item[3],
+      desc: item[4],
+      etym: item[5],
+      koChosung: getChosung(item[1])
+    }));
+
+    // =========================================================================
+    // 3. 상태 관리 및 UI 초기화
+    // =========================================================================
+    let currentCategory = "전체";
+    let currentSearchMode = "all"; // all, en, ko, abbr
+    let currentMorphemeType = "all"; // all, prefix, root, suffix
+
+    const CATEGORY_META = [
+      { name: "전체", icon: "🌐" },
+      { name: "심혈관", icon: "❤️" },
+      { name: "호흡기", icon: "🫁" },
+      { name: "소화기", icon: "🍽️" },
+      { name: "신경", icon: "🧠" },
+      { name: "근골격", icon: "🦴" },
+      { name: "내분비", icon: "🩸" },
+      { name: "비뇨생식", icon: "💧" },
+      { name: "혈액/종양", icon: "🧬" },
+      { name: "감염/면역", icon: "🛡️" },
+      { name: "외과/응급/기타", icon: "🏥" }
+    ];
+
+    // 탭 전환
+    function switchTab(tabName) {
+      document.querySelectorAll(".nav-tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+      });
+      document.getElementById("tab-dictionary").classList.toggle("active", tabName === "dictionary");
+      document.getElementById("tab-decomposer").classList.toggle("active", tabName === "decomposer");
+    }
+
+    // 다크모드 초기화 및 토글
+    function initTheme() {
+      const saved = localStorage.getItem("medterm_theme");
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = saved || (prefersDark ? "dark" : "light");
+      applyTheme(theme);
+
+      document.getElementById("themeToggleBtn").addEventListener("click", () => {
+        const current = document.documentElement.getAttribute("data-theme");
+        const next = current === "dark" ? "light" : "dark";
+        applyTheme(next);
+        localStorage.setItem("medterm_theme", next);
+      });
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.setAttribute("data-theme", theme);
+      const btn = document.getElementById("themeToggleBtn");
+      btn.textContent = theme === "dark" ? "☀️" : "🌙";
+      btn.title = theme === "dark" ? "라이트 모드로 전환" : "다크 모드로 전환";
+    }
+
+    // 분류 버튼 렌더링
+    function renderCategories() {
+      const bar = document.getElementById("categoryBar");
+      const counts = { "전체": MEDICAL_TERMS.length };
+      MEDICAL_TERMS.forEach((t) => {
+        counts[t.category] = (counts[t.category] || 0) + 1;
+      });
+
+      bar.innerHTML = CATEGORY_META.map((cat) => {
+        const count = counts[cat.name] || 0;
+        const activeClass = cat.name === currentCategory ? "active" : "";
+        return `
+          <button type="button" class="cat-btn ${activeClass}" data-cat="${cat.name}">
+            <span>${cat.icon} ${cat.name}</span>
+            <span class="cat-count">${count}</span>
+          </button>
+        `;
+      }).join("");
+
+      bar.querySelectorAll(".cat-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          currentCategory = btn.dataset.cat;
+          renderCategories();
+          renderTerms();
+        });
+      });
+    }
+
+    // 검색어 하이라이트 함수
+    function highlightText(text, query) {
+      if (!query || !query.trim()) return escapeHtml(text);
+      const q = query.trim();
+      const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`(${escapedQ})`, "gi");
+      return escapeHtml(text).replace(regex, '<mark class="hl">$1</mark>');
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    // 어원 문자열을 배지 형태로 꾸미기
+    function formatEtymology(etymStr) {
+      const parts = etymStr.split(/\s*\+\s*|\s*\/\s*/);
+      return parts.map((p) => {
+        const trimmed = p.trim();
+        let cls = "root";
+        if (/^[a-z]+-\(/i.test(trimmed)) cls = "prefix";
+        else if (/^-[a-z]+/i.test(trimmed)) cls = "suffix";
+        return `<span class="etym-chip ${cls}">${escapeHtml(trimmed)}</span>`;
+      }).join('<span>+</span>');
+    }
+
+    // 의학용어 리스트 렌더링
+    function renderTerms() {
+      const query = document.getElementById("termSearchInput").value.trim();
+      const qLower = query.toLowerCase();
+      const clearBtn = document.getElementById("clearSearchBtn");
+      clearBtn.classList.toggle("visible", query.length > 0);
+
+      const filtered = MEDICAL_TERMS.filter((item) => {
+        if (currentCategory !== "전체" && item.category !== currentCategory) {
+          return false;
+        }
+        if (!qLower) return true;
+
+        const matchEn = item.en.toLowerCase().includes(qLower);
+        const matchKo = item.ko.toLowerCase().includes(qLower) || item.koChosung.includes(query);
+        const matchAbbr = item.abbr.toLowerCase().includes(qLower);
+        const matchDesc = item.desc.toLowerCase().includes(qLower) || item.etym.toLowerCase().includes(qLower);
+
+        if (currentSearchMode === "en") return matchEn;
+        if (currentSearchMode === "ko") return matchKo || matchDesc;
+        if (currentSearchMode === "abbr") return matchAbbr;
+        return matchEn || matchKo || matchAbbr || matchDesc;
+      });
+
+      document.getElementById("filteredCount").textContent = filtered.length;
+      document.getElementById("totalCount").textContent = MEDICAL_TERMS.length;
+      document.getElementById("footerTotalTerms").textContent = MEDICAL_TERMS.length;
+
+      const grid = document.getElementById("termsGrid");
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <h3>검색 결과가 없습니다</h3>
+            <p style="margin-top: 0.4rem;">영어, 한글, 약어(예: MI, COPD, HTN) 또는 다른 분류 필터를 선택해 보세요.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map((item) => {
+        const firstWord = item.en.split(" ").pop().replace(/[^a-zA-Z]/g, "") || item.en;
+        return `
+          <article class="term-card">
+            <div>
+              <div class="term-top">
+                <div class="term-badges">
+                  <span class="badge-cat">${escapeHtml(item.category)}</span>
+                  <span class="badge-abbr" title="의학 약어">${highlightText(item.abbr, query)}</span>
+                </div>
+                <button type="button" class="analyze-link-btn" onclick="jumpToDecomposer('${escapeHtml(firstWord)}', '${escapeHtml(item.en)}')">
+                  🔬 단어 분해
+                </button>
+              </div>
+              <h3 class="term-en" style="margin-top: 0.55rem;">${highlightText(item.en, query)}</h3>
+              <div class="term-ko">${highlightText(item.ko, query)}</div>
+              <p class="term-desc" style="margin-top: 0.45rem;">${highlightText(item.desc, query)}</p>
+            </div>
+            <div class="term-etym" title="어근/접두사/접미사 구성">
+              ${formatEtymology(item.etym)}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function jumpToDecomposer(wordToDecompose, fullTerm) {
+      switchTab("decomposer");
+      runDecomposer(wordToDecompose, fullTerm);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // =========================================================================
+    // 4. 영어 의학용어 단어 분해기 알고리즘 (Medical Word Decomposer)
+    // =========================================================================
+    function decomposeMedicalWord(rawInput) {
+      const cleaned = rawInput.trim();
+      if (!cleaned) return null;
+
+      // 사전에서 정확히 일치하는 용어가 있는지 먼저 확인
+      const matchedTerm = MEDICAL_TERMS.find(
+        (t) => t.en.toLowerCase() === cleaned.toLowerCase() ||
+               t.en.toLowerCase().split(/\s+/).includes(cleaned.toLowerCase())
+      );
+
+      // 분석 대상 단일 단어 추출 (여러 단어일 경우 가장 의학 형태소가 풍부한 마지막/핵심 단어 분석)
+      const tokens = cleaned.toLowerCase().replace(/[^a-z\s-]/g, "").split(/\s+/).filter(Boolean);
+      const targetWord = tokens.reduce((best, cur) => (cur.length >= best.length ? cur : best), tokens[0] || "");
+
+      let rem = targetWord;
+      const foundParts = [];
+
+      // 1) Prefix 탐색 (가장 긴 키부터 매칭)
+      const prefixCandidates = [];
+      MORPHEMES.filter((m) => m.type === "prefix").forEach((m) => {
+        m.keys.forEach((k) => prefixCandidates.push({ key: k, morpheme: m }));
+      });
+      prefixCandidates.sort((a, b) => b.key.length - a.key.length);
+
+      for (const cand of prefixCandidates) {
+        if (rem.startsWith(cand.key) && rem.length - cand.key.length >= 4) {
+          foundParts.push({
+            type: "prefix",
+            typeLabel: "접두사 (Prefix)",
+            matched: cand.key + "-",
+            form: cand.morpheme.form,
+            meaning: cand.morpheme.meaning
+          });
+          rem = rem.slice(cand.key.length);
+          break;
+        }
+      }
+
+      // 2) Suffix 탐색 (가장 긴 키부터 매칭)
+      const suffixCandidates = [];
+      MORPHEMES.filter((m) => m.type === "suffix").forEach((m) => {
+        m.keys.forEach((k) => suffixCandidates.push({ key: k, morpheme: m }));
+      });
+      suffixCandidates.sort((a, b) => b.key.length - a.key.length);
+
+      let matchedSuffix = null;
+      for (const cand of suffixCandidates) {
+        if (rem.endsWith(cand.key) && rem.length - cand.key.length >= 2) {
+          matchedSuffix = {
+            type: "suffix",
+            typeLabel: "접미사 (Suffix)",
+            matched: "-" + cand.key,
+            form: cand.morpheme.form,
+            meaning: cand.morpheme.meaning
+          };
+          rem = rem.slice(0, rem.length - cand.key.length);
+          break;
+        }
+      }
+
+      // 3) 남은 중간 부분(rem)에서 Root(어근) 연속 탐색
+      const rootCandidates = [];
+      MORPHEMES.filter((m) => m.type === "root").forEach((m) => {
+        m.keys.forEach((k) => rootCandidates.push({ key: k, morpheme: m }));
+      });
+      rootCandidates.sort((a, b) => b.key.length - a.key.length);
+
+      let safety = 0;
+      while (rem.length > 0 && safety < 5) {
+        safety++;
+        // 연결모음 o, i 제거 시도 전 직접 매칭
+        let matchedRoot = null;
+        for (const cand of rootCandidates) {
+          if (rem.startsWith(cand.key)) {
+            matchedRoot = cand;
+            break;
+          }
+        }
+
+        if (matchedRoot) {
+          foundParts.push({
+            type: "root",
+            typeLabel: "어근 (Root)",
+            matched: matchedRoot.key,
+            form: matchedRoot.morpheme.form,
+            meaning: matchedRoot.morpheme.meaning
+          });
+          rem = rem.slice(matchedRoot.key.length);
+          // 연결 모음 'o' 또는 'i'가 바로 뒤에 남아있다면 제거
+          if ((rem === "o" || rem === "i") || (rem.length > 2 && (rem.startsWith("o") || rem.startsWith("i")))) {
+            const nextCheck = rem.slice(1);
+            if (rootCandidates.some((c) => nextCheck.startsWith(c.key)) || nextCheck.length === 0) {
+              rem = nextCheck;
+            }
+          }
+        } else {
+          // 매칭되지 않은 어간이 남았다면 일반 어근으로 표시
+          foundParts.push({
+            type: "root",
+            typeLabel: "어근/어간 (Stem)",
+            matched: rem,
+            form: rem,
+            meaning: matchedTerm ? `${matchedTerm.ko} 관련 핵심 어근` : "핵심 어간 (Core Stem)"
+          });
+          rem = "";
+        }
+      }
+
+      if (matchedSuffix) {
+        foundParts.push(matchedSuffix);
+      }
+
+      return {
+        input: cleaned,
+        targetWord,
+        matchedTerm,
+        parts: foundParts
+      };
+    }
+
+    function runDecomposer(word, fullTermHint) {
+      const inputEl = document.getElementById("decomposeInput");
+      inputEl.value = word;
+      const res = decomposeMedicalWord(word);
+      const outEl = document.getElementById("decomposeOutput");
+
+      if (!res || res.parts.length === 0) {
+        outEl.innerHTML = `<p>분해할 영어 의학용어를 입력해 주세요.</p>`;
+        return;
+      }
+
+      const termInfoHtml = res.matchedTerm
+        ? `
+          <div style="margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-color);">
+            <span class="badge-cat">${escapeHtml(res.matchedTerm.category)}</span>
+            <span class="badge-abbr" style="margin-left: 0.35rem;">${escapeHtml(res.matchedTerm.abbr)}</span>
+            <h3 style="margin-top: 0.4rem; font-size: 1.2rem;">
+              ${escapeHtml(res.matchedTerm.en)} — <span style="color: var(--accent-primary);">${escapeHtml(res.matchedTerm.ko)}</span>
+            </h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 0.25rem;">${escapeHtml(res.matchedTerm.desc)}</p>
+            <div style="margin-top: 0.45rem; font-size: 0.84rem; color: var(--text-muted);">
+              사전 어원 표기: <strong>${escapeHtml(res.matchedTerm.etym)}</strong>
+            </div>
+          </div>
+        `
+        : `<div style="font-weight: 700; font-size: 1.05rem;">분석 단어: <span style="color: var(--accent-primary);">${escapeHtml(res.targetWord)}</span></div>`;
+
+      const flowHtml = res.parts.map((p, i) => {
+        const plus = i < res.parts.length - 1 ? `<div class="part-plus">+</div>` : "";
+        return `
+          <div class="part-box ${p.type}">
+            <span class="part-type">${escapeHtml(p.typeLabel)}</span>
+            <span class="part-morpheme">${escapeHtml(p.matched)}</span>
+            <span style="font-size: 0.78rem; opacity: 0.85;">사전형: ${escapeHtml(p.form)}</span>
+            <span class="part-meaning">${escapeHtml(p.meaning)}</span>
+          </div>
+          ${plus}
+        `;
+      }).join("");
+
+      const combinedMeaning = res.parts.map((p) => p.meaning.split("(")[0].trim()).join(" + ");
+
+      outEl.innerHTML = `
+        ${termInfoHtml}
+        <div class="parts-flow">${flowHtml}</div>
+        <div style="font-size: 0.92rem; font-weight: 700; color: var(--text-primary);">
+          💡 형태소 결합 풀이: <span style="color: var(--accent-primary);">${escapeHtml(combinedMeaning)}</span>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 5. 어근·접두사·접미사 사전 렌더링
+    // =========================================================================
+    function renderMorphemes() {
+      const q = document.getElementById("morphemeSearchInput").value.trim().toLowerCase();
+      const filtered = MORPHEMES.filter((m) => {
+        if (currentMorphemeType !== "all" && m.type !== currentMorphemeType) return false;
+        if (!q) return true;
+        return (
+          m.form.toLowerCase().includes(q) ||
+          m.meaning.toLowerCase().includes(q) ||
+          m.examples.toLowerCase().includes(q)
+        );
+      });
+
+      document.getElementById("morphemeCount").textContent = filtered.length;
+
+      const typeLabelMap = {
+        prefix: { text: "접두사 (Prefix)", cls: "prefix" },
+        root: { text: "어근 (Root)", cls: "root" },
+        suffix: { text: "접미사 (Suffix)", cls: "suffix" }
+      };
+
+      const grid = document.getElementById("morphemeGrid");
+      grid.innerHTML = filtered.map((m) => {
+        const badge = typeLabelMap[m.type];
+        const firstExample = (m.examples.split(",")[0] || "").split("(")[0].trim();
+        return `
+          <div class="morpheme-card">
+            <div class="morpheme-header">
+              <span class="morpheme-form">${escapeHtml(m.form)}</span>
+              <span class="etym-chip ${badge.cls}">${badge.text}</span>
+            </div>
+            <div class="morpheme-meaning">${escapeHtml(m.meaning)}</div>
+            <div class="morpheme-examples">예시: ${escapeHtml(m.examples)}</div>
+            <div>
+              <button type="button" class="analyze-link-btn" onclick="runDecomposer('${escapeHtml(firstExample)}')">
+                🔬 '${escapeHtml(firstExample)}' 분해해보기
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // =========================================================================
+    // 6. 이벤트 바인딩 및 초기 실행
+    // =========================================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      initTheme();
+      renderCategories();
+      renderTerms();
+      renderMorphemes();
+      runDecomposer("Electrocardiogram");
+
+      // 의학용어 검색 이벤트
+      const searchInput = document.getElementById("termSearchInput");
+      searchInput.addEventListener("input", renderTerms);
+
+      document.getElementById("clearSearchBtn").addEventListener("click", () => {
+        searchInput.value = "";
+        searchInput.focus();
+        renderTerms();
+      });
+
+      // 검색 모드 칩 이벤트
+      document.querySelectorAll("#searchModeGroup .mode-chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          document.querySelectorAll("#searchModeGroup .mode-chip").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          currentSearchMode = chip.dataset.mode;
+          renderTerms();
+        });
+      });
+
+      // 단어 분해기 이벤트
+      document.getElementById("decomposeBtn").addEventListener("click", () => {
+        runDecomposer(document.getElementById("decomposeInput").value);
+      });
+      document.getElementById("decomposeInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          runDecomposer(e.target.value);
+        }
+      });
+
+      // 형태소 사전 검색/필터 이벤트
+      document.getElementById("morphemeSearchInput").addEventListener("input", renderMorphemes);
+      document.querySelectorAll("#morphemeTypeGroup .mode-chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          document.querySelectorAll("#morphemeTypeGroup .mode-chip").forEach((c) => c.classList.remove("active"));
+          chip.classList.add("active");
+          currentMorphemeType = chip.dataset.mtype;
+          renderMorphemes();
+        });
+      });
+    });
+  </script>
+</body>
+</html>
